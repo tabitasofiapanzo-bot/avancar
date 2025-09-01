@@ -43,6 +43,22 @@ abstract class Controlador {
         }
     }
 
+    /**
+     * Carrega e renderiza uma visão de autenticação.
+     */
+    protected function carregarVisaoAuth($nomeVisao, $dados = []) {
+        $caminhoVisao = BASE_PATH . '/views/pages/auth/' . $nomeVisao . '.php';
+        if (file_exists($caminhoVisao)) {
+            extract($dados);
+            ob_start();
+            require $caminhoVisao;
+            $conteudo = ob_get_clean();
+            require_once BASE_PATH . '/views/layouts/auth.php';
+        } else {
+            die("Erro: Visão de autenticação '{$nomeVisao}' não encontrada.");
+        }
+    }
+
      /**
      * Carrega uma visão parcial (um fragmento de HTML).
      *

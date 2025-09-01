@@ -1,3 +1,10 @@
+<?php
+// Protege a página, redirecionando para o login se o usuário não estiver autenticado.
+if (!isset($_SESSION['usuario_id'])) {
+    header('Location: /login');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>

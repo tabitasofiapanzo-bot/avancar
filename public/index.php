@@ -1,5 +1,7 @@
 <?php
 
+session_start();
+
 // Define o caminho base da aplicação
 define('BASE_PATH', dirname(__DIR__));
 

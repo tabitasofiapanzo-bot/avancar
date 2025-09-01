@@ -16,4 +16,24 @@ class Usuario extends Modelo {
 
         return $stmt->execute(['id' => $id]);
     }
+
+    public function buscarPorEmail($email) {
+        $stmt = $this->pdo->prepare("SELECT * FROM {$this->tabela} WHERE email = :email");
+        $stmt->execute(['email' => $email]);
+        return $stmt->fetch();
+    }
+
+    public function criar($dados) {
+        $stmt = $this->pdo->prepare(
+            "INSERT INTO {$this->tabela} (nome, email, senha) VALUES (:nome, :email, :senha)"
+        );
+
+        $sucesso = $stmt->execute([
+            'nome' => $dados['nome'],
+            'email' => $dados['email'],
+            'senha' => $dados['senha'],
+        ]);
+
+        return $sucesso ? $this->pdo->lastInsertId() : false;
+    }
 }
