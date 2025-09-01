@@ -1,0 +1,2284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avançar - Organização Pessoal</title>
+    
+    <!-- Dependências Externas (CDN) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Padrões de Design - Baseado em padroes-design.md */
+
+        /* 1. Cores e Variáveis Globais */
+        :root {
+            --cor-fundo-principal: #0d1421;
+            --cor-fundo-secundario: #1a2332;
+            --cor-bordas: #2d3748;
+            --cor-hover: #4a5568;
+            --cor-primaria: #6b46c1;
+            --cor-primaria-hover: #7c3aed;
+            --cor-sucesso: #4caf50;
+            --cor-info: #2196f3;
+            --cor-aviso: #ff9800;
+            --cor-erro: #f44336;
+            --cor-texto-principal: #ffffff;
+            --cor-texto-secundario: #e2e8f0;
+            --cor-texto-terciario: #cbd5e0;
+            --cor-texto-desabilitado: #718096;
+
+            --espacamento-xs: 4px;
+            --espacamento-sm: 8px;
+            --espacamento-md: 16px;
+            --espacamento-lg: 24px;
+            --espacamento-xl: 32px;
+
+            --transicao-padrao: all 0.2s ease;
+        }
+
+        /* 2. Estilos Base e Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--cor-fundo-principal);
+            color: var(--cor-texto-secundario);
+            font-size: 16px;
+            line-height: 1.6;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        /* 3. Scrollbars Personalizadas */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--cor-fundo-secundario);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--cor-hover);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--cor-primaria);
+        }
+
+        /* 4. Tipografia */
+        h1, h2, h3, h4 {
+            color: var(--cor-texto-principal);
+            font-weight: 600;
+            margin-bottom: var(--espacamento-md);
+        }
+        h1 { font-size: 2rem; }
+        h2 { font-size: 1.5rem; }
+        h3 { font-size: 1.25rem; }
+        h4 { font-size: 1.125rem; }
+        p { margin-bottom: var(--espacamento-md); }
+        a { color: var(--cor-primaria); text-decoration: none; transition: var(--transicao-padrao); }
+        a:hover { color: var(--cor-primaria-hover); }
+
+        /* 5. Layout Principal */
+        .container-aplicacao {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .menu-lateral {
+            width: 280px;
+            background-color: var(--cor-fundo-secundario);
+            padding: var(--espacamento-lg) var(--espacamento-md);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--cor-bordas);
+            transition: transform 0.3s ease;
+            z-index: 1200;
+        }
+
+        .conteudo-principal {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .cabecalho {
+            padding: var(--espacamento-md) var(--espacamento-xl);
+            background-color: var(--cor-fundo-secundario);
+            border-bottom: 1px solid var(--cor-bordas);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--espacamento-md);
+            flex-shrink: 0;
+        }
+
+        .container-pagina {
+            padding: var(--espacamento-xl);
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .rodape {
+            padding: var(--espacamento-sm) var(--espacamento-xl);
+            background-color: var(--cor-fundo-secundario);
+            border-top: 1px solid var(--cor-bordas);
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--cor-texto-terciario);
+            flex-shrink: 0;
+        }
+
+        .cabecalho-pagina {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--espacamento-lg);
+            border-bottom: 1px solid var(--cor-bordas);
+            padding-bottom: var(--espacamento-md);
+        }
+        .breadcrumb {
+            font-size: 0.9rem;
+            color: var(--cor-texto-terciario);
+        }
+        .breadcrumb a {
+            color: var(--cor-texto-secundario);
+        }
+        .breadcrumb a:hover {
+            color: var(--cor-primaria);
+        }
+
+        /* 6. Componentes UI */
+
+        /* Menu Lateral */
+        .menu-logo {
+            text-align: center;
+            margin-bottom: var(--espacamento-xl);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--cor-texto-principal);
+        }
+        .menu-logo i {
+            margin-right: var(--espacamento-sm);
+            color: var(--cor-primaria);
+        }
+        .menu-navegacao {
+            list-style: none;
+            flex-grow: 1;
+        }
+        .menu-grupo .grupo-titulo {
+            color: var(--cor-texto-terciario);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            padding: var(--espacamento-md) var(--espacamento-sm);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: var(--espacamento-sm);
+        }
+        .menu-grupo .grupo-titulo .fa-chevron-down {
+            margin-left: auto;
+            transition: transform 0.2s ease;
+        }
+        .menu-grupo.recolhido .grupo-titulo .fa-chevron-down {
+            transform: rotate(-90deg);
+        }
+        .grupo-links {
+            list-style: none;
+            max-height: 500px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding-left: var(--espacamento-sm);
+        }
+        .menu-grupo.recolhido .grupo-links {
+            max-height: 0;
+        }
+        .menu-link a {
+            display: flex;
+            align-items: center;
+            padding: 12px var(--espacamento-md);
+            color: var(--cor-texto-secundario);
+            border-radius: 6px;
+            margin-bottom: var(--espacamento-sm);
+            transition: var(--transicao-padrao);
+        }
+        .menu-link a:hover {
+            background-color: var(--cor-hover);
+            color: var(--cor-texto-principal);
+        }
+        .menu-link a.ativo {
+            background-color: var(--cor-primaria);
+            color: var(--cor-texto-principal);
+            box-shadow: 0 4px 10px rgba(107, 70, 193, 0.3);
+        }
+        .menu-link a i {
+            width: 20px;
+            margin-right: var(--espacamento-md);
+            text-align: center;
+        }
+        
+        /* Cabeçalho */
+        .cabecalho-esquerda { display: flex; align-items: center; gap: var(--espacamento-md); }
+        .pesquisa-global { position: relative; }
+        .pesquisa-global .fa-search { position: absolute; left: 12px; top: 12px; color: var(--cor-texto-terciario); }
+        .pesquisa-global input {
+            background-color: var(--cor-fundo-principal);
+            border: 1px solid var(--cor-bordas);
+            border-radius: 6px;
+            padding: 10px 10px 10px 35px;
+            color: var(--cor-texto-secundario);
+            transition: var(--transicao-padrao);
+        }
+        .pesquisa-global input:focus {
+            outline: none;
+            border-color: var(--cor-primaria);
+            width: 250px;
+        }
+
+        .cabecalho-direita { display: flex; align-items: center; gap: var(--espacamento-sm); }
+        .perfil-usuario { display: flex; align-items: center; cursor: pointer; }
+        .perfil-usuario img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-left: var(--espacamento-md);
+            border: 2px solid var(--cor-primaria);
+        }
+        .botao-hamburguer { display: none; }
+
+        /* Botões */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transicao-padrao);
+            text-decoration: none;
+        }
+        .btn i { margin-right: var(--espacamento-sm); }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-primario {
+            background-color: var(--cor-primaria);
+            color: white;
+            box-shadow: 0 4px 10px rgba(107, 70, 193, 0.3);
+        }
+        .btn-primario:hover { 
+            background-color: var(--cor-primaria-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(107, 70, 193, 0.4);
+        }
+        .btn-secundario {
+            background-color: var(--cor-hover);
+            color: var(--cor-texto-secundario);
+        }
+        .btn-secundario:hover { background-color: var(--cor-bordas); }
+        .btn-perigo {
+            background-color: var(--cor-erro);
+            color: white;
+        }
+        .btn-perigo:hover { background-color: #d32f2f; }
+        .btn-pequeno { padding: 6px 12px; font-size: 0.875rem; }
+        .btn-icone {
+            background: none;
+            color: var(--cor-texto-terciario);
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            font-size: 1.1rem;
+            border-radius: 50%;
+        }
+        .btn-icone:hover { color: var(--cor-primaria); background-color: var(--cor-hover); }
+
+
+        /* Cards */
+        .card {
+            background-color: var(--cor-fundo-secundario);
+            border-radius: 8px;
+            border: 1px solid var(--cor-bordas);
+            padding: var(--espacamento-lg);
+            transition: var(--transicao-padrao);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .card-clicavel:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border-color: var(--cor-primaria);
+            cursor: pointer;
+        }
+        .card-pilar {
+            border-left: 5px solid; /* Cor definida via JS */
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--espacamento-md);
+            padding-bottom: var(--espacamento-md);
+            border-bottom: 1px solid var(--cor-bordas);
+        }
+        .card-header h3 { margin-bottom: 0; }
+        .card-body {
+            flex-grow: 1;
+        }
+        .card-footer {
+            margin-top: var(--espacamento-lg);
+            padding-top: var(--espacamento-md);
+            border-top: 1px solid var(--cor-bordas);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--espacamento-sm);
+        }
+
+        /* Formulários */
+        .campo-grupo {
+            margin-bottom: var(--espacamento-md);
+        }
+        .campo-label {
+            display: block;
+            margin-bottom: var(--espacamento-sm);
+            font-weight: 500;
+            color: var(--cor-texto-secundario);
+        }
+        .campo-input, .campo-select, .campo-textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--cor-fundo-principal);
+            border: 1px solid var(--cor-bordas);
+            border-radius: 6px;
+            color: var(--cor-texto-secundario);
+            font-size: 1rem;
+            transition: var(--transicao-padrao);
+        }
+        .campo-input:focus, .campo-select:focus, .campo-textarea:focus {
+            outline: none;
+            border-color: var(--cor-primaria);
+            box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.3);
+        }
+        .campo-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .campo-grupo-horizontal {
+            display: flex;
+            gap: var(--espacamento-md);
+        }
+        .campo-grupo-horizontal .campo-grupo {
+            flex: 1;
+        }
+        
+        /* Grid System */
+        .grid {
+            display: grid;
+            gap: var(--espacamento-lg);
+        }
+        .grid-2 { grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+        .grid-4 { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+
+        /* Modais */
+        .modal {
+            position: fixed;
+            z-index: 1300;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(13, 20, 33, 0.8);
+            backdrop-filter: blur(5px);
+            display: none; /* Alterado por JS */
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.visivel {
+            display: flex;
+        }
+        .modal-conteudo {
+            background-color: var(--cor-fundo-secundario);
+            margin: auto;
+            padding: var(--espacamento-xl);
+            border: 1px solid var(--cor-bordas);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            animation: animarModal 0.3s ease-out;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        @keyframes animarModal {
+            from { transform: translateY(20px) scale(0.98); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--cor-bordas);
+            padding-bottom: var(--espacamento-md);
+            margin-bottom: var(--espacamento-lg);
+        }
+        .modal-header h2 { margin: 0; }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--espacamento-md);
+            margin-top: var(--espacamento-lg);
+            padding-top: var(--espacamento-md);
+            border-top: 1px solid var(--cor-bordas);
+        }
+
+        /* Página do Dia */
+        .container-dia {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: var(--espacamento-lg);
+        }
+        .secao-dia {
+            background: var(--cor-fundo-secundario);
+            border-radius: 8px;
+            padding: var(--espacamento-lg);
+            border-top: 3px solid var(--cor-primaria);
+        }
+        .secao-dia h3 {
+            border-bottom: 1px solid var(--cor-bordas);
+            padding-bottom: var(--espacamento-md);
+        }
+        .lista-tarefas { list-style: none; margin-top: var(--espacamento-md); }
+        .item-tarefa {
+            display: flex;
+            align-items: center;
+            padding: var(--espacamento-md);
+            background: var(--cor-fundo-principal);
+            border-radius: 6px;
+            margin-bottom: var(--espacamento-sm);
+            border-left: 4px solid var(--cor-primaria);
+            transition: var(--transicao-padrao);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .item-tarefa.concluida {
+            opacity: 0.6;
+            background: #151e2b;
+        }
+        .item-tarefa.concluida .titulo-tarefa {
+             text-decoration: line-through;
+        }
+        .item-tarefa:hover {
+            transform: translateX(5px);
+            background-color: #2a374a;
+        }
+        .checkbox-tarefa {
+            width: 20px;
+            height: 20px;
+            margin-right: var(--espacamento-md);
+            cursor: pointer;
+            accent-color: var(--cor-primaria);
+        }
+        .info-tarefa { flex-grow: 1; }
+        .info-tarefa .titulo-tarefa { font-weight: 500; }
+        .info-tarefa .detalhes-tarefa { font-size: 0.875rem; color: var(--cor-texto-terciario); }
+        .horario-tarefa { font-size: 0.875rem; color: var(--cor-texto-terciario); }
+        
+        /* Hierarquia nos Cards */
+        .lista-sub-item {
+            list-style: none;
+            margin-top: var(--espacamento-md);
+        }
+        .sub-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--espacamento-sm) var(--espacamento-md);
+            background-color: var(--cor-fundo-principal);
+            border-radius: 4px;
+            margin-bottom: var(--espacamento-sm);
+            font-size: 0.9rem;
+            border-left: 2px solid var(--cor-bordas);
+            transition: var(--transicao-padrao);
+        }
+        .sub-item a { color: var(--cor-texto-secundario); }
+        .sub-item:hover {
+            background-color: var(--cor-hover);
+            border-left-color: var(--cor-primaria);
+        }
+        .form-add-subitem {
+            display: flex;
+            gap: var(--espacamento-sm);
+            margin-top: var(--espacamento-md);
+        }
+        .form-add-subitem input { flex-grow: 1; }
+
+
+        /* Página do Calendário */
+        .cabecalho-calendario {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--espacamento-md);
+            flex-wrap: wrap;
+            gap: var(--espacamento-md);
+        }
+        .cabecalho-calendario h3 { margin: 0; }
+        .cabecalho-calendario .campo-grupo { max-width: 300px; flex-grow: 1; margin-bottom: 0; }
+
+        .container-calendario {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            background: var(--cor-bordas);
+            border: 1px solid var(--cor-bordas);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .dia-calendario {
+            background: var(--cor-fundo-principal);
+            min-height: 100px;
+            padding: var(--espacamento-sm);
+        }
+        .dia-calendario span {
+            font-weight: 600;
+            display: block;
+        }
+        .dia-calendario:hover { background: var(--cor-fundo-secundario); }
+        .dia-calendario.hoje span {
+            background-color: var(--cor-primaria);
+            color: var(--cor-texto-principal);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dia-calendario.sucesso-completo { border-top: 4px solid var(--cor-sucesso); }
+        .dia-calendario.sucesso-parcial { border-top: 4px solid var(--cor-aviso); }
+        .dia-calendario.nao-sucedido { border-top: 4px solid var(--cor-erro); }
+        .dia-calendario.dia-livre { border-top: 4px solid var(--cor-info); }
+        .dia-calendario.outro-mes { opacity: 0.4; }
+        .header-calendario {
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--cor-texto-terciario);
+            padding: var(--espacamento-sm);
+            background: var(--cor-fundo-secundario);
+        }
+        
+        /* Página Perfil e Configurações */
+        .perfil-container {
+            display: flex;
+            gap: var(--espacamento-xl);
+            align-items: flex-start;
+        }
+        .perfil-avatar {
+            text-align: center;
+        }
+        .perfil-avatar img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 4px solid var(--cor-primaria);
+            margin-bottom: var(--espacamento-md);
+        }
+        .perfil-info { flex-grow: 1; }
+        .stat-item {
+            background: var(--cor-fundo-principal);
+            padding: var(--espacamento-md);
+            border-radius: 6px;
+            text-align: center;
+        }
+        .stat-item .stat-valor {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--cor-primaria);
+        }
+        .stat-item .stat-label {
+            font-size: 0.9rem;
+            color: var(--cor-texto-terciario);
+        }
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--espacamento-md) 0;
+            border-bottom: 1px solid var(--cor-bordas);
+        }
+        
+        /* Página de Planeamento */
+        .container-planeamento {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--espacamento-lg);
+        }
+        .dia-semana {
+            background-color: var(--cor-fundo-secundario);
+            border-radius: 8px;
+            border-top: 3px solid var(--cor-bordas);
+        }
+        .dia-semana-header {
+            padding: var(--espacamento-md);
+            border-bottom: 1px solid var(--cor-bordas);
+        }
+        .dia-semana-body {
+            padding: var(--espacamento-md);
+            min-height: 200px;
+        }
+        .tarefa-planeamento {
+            font-size: 0.85rem;
+            padding: var(--espacamento-sm);
+            background-color: var(--cor-fundo-principal);
+            border-radius: 4px;
+            margin-bottom: var(--espacamento-sm);
+            border-left: 3px solid var(--cor-primaria);
+            cursor: grab;
+        }
+        .tarefa-planeamento:active {
+            cursor: grabbing;
+            opacity: 0.8;
+        }
+        .tarefa-planeamento-placeholder {
+            border: 2px dashed var(--cor-bordas);
+            border-radius: 4px;
+            padding: var(--espacamento-lg);
+            text-align: center;
+            color: var(--cor-texto-terciario);
+        }
+
+        /* Onboarding */
+        .onboarding-stepper {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: var(--espacamento-lg);
+            padding-bottom: var(--espacamento-md);
+            border-bottom: 1px solid var(--cor-bordas);
+        }
+        .onboarding-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--cor-texto-terciario);
+            flex-grow: 1;
+            position: relative;
+        }
+        .onboarding-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background-color: var(--cor-bordas);
+            z-index: -1;
+        }
+        .onboarding-step .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--cor-fundo-principal);
+            border: 2px solid var(--cor-bordas);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--espacamento-sm);
+            transition: var(--transicao-padrao);
+            z-index: 1;
+        }
+        .onboarding-step .step-label {
+            font-size: 0.8rem;
+        }
+        .onboarding-step.ativo .step-circle {
+            background-color: var(--cor-primaria);
+            border-color: var(--cor-primaria);
+            color: var(--cor-texto-principal);
+        }
+        .onboarding-step.ativo .step-label {
+            color: var(--cor-texto-principal);
+            font-weight: 500;
+        }
+        .step-content {
+            display: none;
+        }
+        .step-content.ativo {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tarefa-global-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--espacamento-sm) 0;
+            border-bottom: 1px solid var(--cor-bordas);
+        }
+        .tarefa-global-item .campo-grupo {
+            margin-bottom: 0;
+            width: 120px;
+        }
+        .pilar-categoria-setup {
+            margin-bottom: var(--espacamento-md);
+        }
+        .pilar-categoria-setup h5 {
+            padding-bottom: var(--espacamento-sm);
+            border-bottom: 1px solid var(--cor-bordas);
+            margin-bottom: var(--espacamento-sm);
+        }
+        .card-clicavel.ativo {
+            border-color: var(--cor-primaria-hover);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.5);
+            background-color: #2a374a;
+        }
+
+        /* Utilitários */
+        .display-none { display: none; }
+        .texto-centro { text-align: center; }
+        .mt-lg { margin-top: var(--espacamento-lg); }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            body { overflow: initial; }
+            .menu-lateral {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100%;
+                transform: translateX(-100%);
+            }
+            .menu-lateral.aberto {
+                transform: translateX(0);
+                box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+            }
+            .botao-hamburguer {
+                display: block;
+                font-size: 1.5rem;
+                color: var(--cor-texto-secundario);
+            }
+            .conteudo-principal {
+                width: 100%;
+            }
+            .container-pagina, .cabecalho, .rodape {
+                padding: var(--espacamento-md);
+            }
+            .grid-3, .grid-2, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+            .pesquisa-global input:focus { width: 150px; }
+            .perfil-container { flex-direction: column; align-items: center; }
+            .container-planeamento { grid-template-columns: 1fr; }
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="container-aplicacao">
+        <!-- MENU LATERAL -->
+        <nav class="menu-lateral" id="menu-lateral">
+            <div class="menu-logo">
+                <i class="fas fa-rocket"></i> Avançar
+            </div>
+            <ul class="menu-navegacao">
+                <li class="menu-grupo">
+                    <div class="grupo-titulo"><i class="fas fa-home"></i> Principal <i class="fas fa-chevron-down"></i></div>
+                    <ul class="grupo-links">
+                        <li class="menu-link"><a href="#dashboard" class="link-navegacao ativo" data-pagina="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</a></li>
+                        <li class="menu-link"><a href="#dia" class="link-navegacao" data-pagina="dia"><i class="fas fa-sun"></i> Página do Dia</a></li>
+                    </ul>
+                </li>
+                <li class="menu-grupo">
+                    <div class="grupo-titulo"><i class="fas fa-cogs"></i> Gestão <i class="fas fa-chevron-down"></i></div>
+                    <ul class="grupo-links">
+                        <li class="menu-link"><a href="#pilares" class="link-navegacao" data-pagina="pilares"><i class="fas fa-stream"></i> Pilares</a></li>
+                        <li class="menu-link"><a href="#metas" class="link-navegacao" data-pagina="metas"><i class="fas fa-bullseye"></i> Metas</a></li>
+                        <li class="menu-link"><a href="#tarefas" class="link-navegacao" data-pagina="tarefas"><i class="fas fa-tasks"></i> Tarefas</a></li>
+                    </ul>
+                </li>
+                <li class="menu-grupo">
+                    <div class="grupo-titulo"><i class="fas fa-chart-line"></i> Análise <i class="fas fa-chevron-down"></i></div>
+                    <ul class="grupo-links">
+                        <li class="menu-link"><a href="#calendario" class="link-navegacao" data-pagina="calendario"><i class="fas fa-calendar-alt"></i> Calendário</a></li>
+                        <li class="menu-link"><a href="#progresso" class="link-navegacao" data-pagina="progresso"><i class="fas fa-chart-bar"></i> Progresso</a></li>
+                        <li class="menu-link"><a href="#planeamento" class="link-navegacao" data-pagina="planeamento"><i class="fas fa-calendar-week"></i> Planeamento</a></li>
+                        <li class="menu-link"><a href="#relatorios" class="link-navegacao" data-pagina="relatorios"><i class="fas fa-file-alt"></i> Relatórios</a></li>
+                    </ul>
+                </li>
+                 <li class="menu-grupo">
+                    <div class="grupo-titulo"><i class="fas fa-user-circle"></i> Conta <i class="fas fa-chevron-down"></i></div>
+                    <ul class="grupo-links">
+                        <li class="menu-link"><a href="#configuracoes" class="link-navegacao" data-pagina="configuracoes"><i class="fas fa-cog"></i> Configurações</a></li>
+                        <li class="menu-link"><a href="#perfil" class="link-navegacao" data-pagina="perfil"><i class="fas fa-user"></i> Perfil</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <div class="conteudo-principal">
+            <header class="cabecalho">
+                <div class="cabecalho-esquerda">
+                    <button class="btn btn-icone botao-hamburguer" id="botao-hamburguer"><i class="fas fa-bars"></i></button>
+                    <div class="pesquisa-global">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Pesquisar tarefas, metas...">
+                    </div>
+                </div>
+                <div class="cabecalho-direita">
+                    <button class="btn btn-icone"><i class="fas fa-bell"></i></button>
+                    <div class="perfil-usuario">
+                        <span>Usuário</span>
+                        <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="Avatar do Usuário">
+                    </div>
+                </div>
+            </header>
+            <main class="container-pagina" id="container-pagina">
+                <!-- O conteúdo da página será injetado aqui pelo JavaScript -->
+            </main>
+            <footer class="rodape">
+                Avançar &copy; 2025 - Transformando ideias em progresso.
+            </footer>
+        </div>
+    </div>
+    
+    <!-- MODAIS -->
+    <!-- Modal para Pilares -->
+    <div id="modal-pilar" class="modal">
+        <div class="modal-conteudo">
+            <div class="modal-header">
+                <h2 id="modal-pilar-titulo">Novo Pilar</h2>
+                <button class="btn btn-icone btn-fechar-modal" data-modal-id="modal-pilar"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="formulario-pilar">
+                <input type="hidden" id="pilar-id">
+                <div class="campo-grupo">
+                    <label for="pilar-nome" class="campo-label"><i class="fas fa-stream"></i> Nome do Pilar</label>
+                    <input type="text" id="pilar-nome" class="campo-input" required>
+                </div>
+                <div class="campo-grupo">
+                    <label for="pilar-descricao" class="campo-label"><i class="fas fa-align-left"></i> Descrição</label>
+                    <textarea id="pilar-descricao" class="campo-textarea"></textarea>
+                </div>
+                <div class="campo-grupo">
+                    <label for="pilar-cor" class="campo-label"><i class="fas fa-palette"></i> Cor</label>
+                    <input type="color" id="pilar-cor" class="campo-input" value="#6b46c1" style="padding: 5px; height: 45px;">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secundario btn-fechar-modal" data-modal-id="modal-pilar">Cancelar</button>
+                    <button type="submit" class="btn btn-primario"><i class="fas fa-save"></i> Salvar Pilar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Metas -->
+    <div id="modal-meta" class="modal">
+        <div class="modal-conteudo">
+            <div class="modal-header">
+                <h2 id="modal-meta-titulo">Nova Meta</h2>
+                <button class="btn btn-icone btn-fechar-modal" data-modal-id="modal-meta"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="formulario-meta">
+                <input type="hidden" id="meta-id">
+                <div class="campo-grupo">
+                    <label for="meta-nome" class="campo-label"><i class="fas fa-bullseye"></i> Nome da Meta</label>
+                    <input type="text" id="meta-nome" class="campo-input" required>
+                </div>
+                 <div class="campo-grupo">
+                    <label for="meta-pilar" class="campo-label"><i class="fas fa-stream"></i> Pilar Associado</label>
+                    <select id="meta-pilar" class="campo-select" required></select>
+                </div>
+                <div class="campo-grupo-horizontal">
+                    <div class="campo-grupo">
+                        <label for="meta-data-inicio" class="campo-label"><i class="fas fa-calendar-plus"></i> Data de Início</label>
+                        <input type="date" id="meta-data-inicio" class="campo-input" required>
+                    </div>
+                    <div class="campo-grupo">
+                        <label for="meta-data-fim" class="campo-label"><i class="fas fa-calendar-check"></i> Data de Fim</label>
+                        <input type="date" id="meta-data-fim" class="campo-input" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secundario btn-fechar-modal" data-modal-id="modal-meta">Cancelar</button>
+                    <button type="submit" class="btn btn-primario"><i class="fas fa-save"></i> Salvar Meta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal para Tarefas -->
+    <div id="modal-tarefa" class="modal">
+        <div class="modal-conteudo">
+            <div class="modal-header">
+                <h2 id="modal-tarefa-titulo">Nova Tarefa</h2>
+                <button class="btn btn-icone btn-fechar-modal" data-modal-id="modal-tarefa"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="formulario-tarefa">
+                <input type="hidden" id="tarefa-id">
+                <div class="campo-grupo">
+                    <label for="tarefa-nome" class="campo-label"><i class="fas fa-pencil-alt"></i> Nome da Tarefa</label>
+                    <input type="text" id="tarefa-nome" class="campo-input" required>
+                </div>
+                <div class="campo-grupo">
+                    <label for="tarefa-micrometa" class="campo-label"><i class="fas fa-check-double"></i> Micro-meta Associada</label>
+                    <select id="tarefa-micrometa" class="campo-select" required></select>
+                </div>
+                <div class="campo-grupo-horizontal">
+                    <div class="campo-grupo">
+                        <label for="tarefa-data" class="campo-label"><i class="fas fa-calendar-day"></i> Data</label>
+                        <input type="date" id="tarefa-data" class="campo-input" required>
+                    </div>
+                    <div class="campo-grupo">
+                        <label for="tarefa-tipo" class="campo-label"><i class="fas fa-clock"></i> Tipo Temporal</label>
+                        <select id="tarefa-tipo" class="campo-select">
+                            <option value="arbitraria">Arbitrária</option>
+                            <option value="manha">Manhã</option>
+                            <option value="tarde">Tarde</option>
+                            <option value="noite">Noite</option>
+                            <option value="horario">Horário Fixo</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="campo-horario-fixo" class="campo-grupo display-none">
+                    <label for="tarefa-horario" class="campo-label">Horário</label>
+                    <input type="time" id="tarefa-horario" class="campo-input">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secundario btn-fechar-modal" data-modal-id="modal-tarefa">Cancelar</button>
+                    <button type="submit" class="btn btn-primario"><i class="fas fa-save"></i> Salvar Tarefa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal de Onboarding -->
+    <div id="modal-onboarding" class="modal">
+        <div class="modal-conteudo" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 id="modal-onboarding-titulo"><i class="fas fa-rocket"></i> Bem-vindo ao Avançar!</h2>
+            </div>
+            <div class="modal-body">
+                <div class="onboarding-stepper">
+                    <div class="onboarding-step ativo" id="onboarding-step-1-indicator">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">Pilares</div>
+                    </div>
+                    <div class="onboarding-step" id="onboarding-step-2-indicator">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Rotina</div>
+                    </div>
+                    <div class="onboarding-step" id="onboarding-step-3-indicator">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">Categorias</div>
+                    </div>
+                    <div class="onboarding-step" id="onboarding-step-4-indicator">
+                        <div class="step-circle"><i class="fas fa-check"></i></div>
+                        <div class="step-label">Concluir</div>
+                    </div>
+                </div>
+
+                <div id="onboarding-step-1" class="step-content ativo">
+                    <h4>Passo 1: Selecione os seus Pilares</h4>
+                    <p>Além dos pilares essenciais já incluídos, escolha outras áreas da sua vida que são importantes para você focar.</p>
+                    <div class="grid grid-3" id="selecao-pilares-opcionais">
+                        <!-- Pilares opcionais serão injetados aqui -->
+                    </div>
+                </div>
+
+                <div id="onboarding-step-2" class="step-content">
+                    <h4>Passo 2: Configure a sua Rotina Essencial</h4>
+                    <p>Defina horários para as suas atividades diárias básicas. Elas serão adicionadas automaticamente ao seu dia.</p>
+                    <div id="configuracao-pilar-global">
+                        <!-- Tarefas do pilar global serão injetadas aqui -->
+                    </div>
+                </div>
+
+                <div id="onboarding-step-3" class="step-content">
+                    <h4>Passo 3: Crie as suas Primeiras Categorias</h4>
+                    <p>Para cada pilar, adicione algumas categorias para começar a organizar as suas metas e tarefas. Ex: No pilar 'Saúde', pode adicionar 'Exercício' e 'Alimentação'.</p>
+                    <div id="configuracao-categorias-iniciais" class="grid grid-2">
+                         <!-- Inputs para categorias serão injetados aqui -->
+                    </div>
+                </div>
+
+                <div id="onboarding-step-4" class="step-content texto-centro">
+                     <i class="fas fa-party-horn fa-3x" style="color: var(--cor-primaria); margin-bottom: 20px;"></i>
+                    <h4>Tudo Pronto!</h4>
+                    <p>A sua configuração inicial está completa. Você está pronto para começar a planear o seu progresso e avançar em direção aos seus objetivos. Bom trabalho!</p>
+                </div>
+            </div>
+            <div class="modal-footer" id="onboarding-footer">
+                 <button type="button" id="btn-onboarding-anterior" class="btn btn-secundario display-none">Anterior</button>
+                 <button type="button" id="btn-onboarding-proximo" class="btn btn-primario">Próximo <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Genérico para Edição de Itens (Categoria, MicroMeta) -->
+    <div id="modal-edicao-item" class="modal">
+        <div class="modal-conteudo" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 id="modal-edicao-titulo">Editar Item</h2>
+                <button class="btn btn-icone btn-fechar-modal" data-modal-id="modal-edicao-item"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="formulario-edicao-item">
+                <input type="hidden" id="edicao-item-id">
+                <input type="hidden" id="edicao-item-tipo">
+                <div class="campo-grupo">
+                    <label for="edicao-item-nome" class="campo-label"><i class="fas fa-pencil-alt"></i> Nome</label>
+                    <input type="text" id="edicao-item-nome" class="campo-input" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secundario btn-fechar-modal" data-modal-id="modal-edicao-item">Cancelar</button>
+                    <button type="submit" class="btn btn-primario"><i class="fas fa-save"></i> Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const hoje = new Date();
+    function hojeString() { return hoje.toISOString().split('T')[0]; }
+    function amanhaString() { const amanha = new Date(hoje); amanha.setDate(hoje.getDate() + 1); return amanha.toISOString().split('T')[0]; }
+
+    // ===== ESTADO DA APLICAÇÃO (Dados Mockados) =====
+    const estado = {
+        paginaAtual: 'dashboard',
+        paginaDetalheId: null,
+        mesCalendario: hoje.getMonth(), // 0-11
+        anoCalendario: hoje.getFullYear(),
+        onboarding: {
+            etapaAtual: 1,
+            pilaresSelecionados: [],
+            tarefasGlobais: {},
+            categoriasIniciais: {},
+        },
+        pilares: [
+            // Obrigatórios
+            { id: 1, nome: 'Saúde', descricao: 'Bem-estar físico e mental', cor: '#4caf50', obrigatorio: true },
+            { id: 2, nome: 'Educação', descricao: 'Aprendizagem e desenvolvimento', cor: '#2196f3', obrigatorio: true },
+            { id: 3, nome: 'Finanças', descricao: 'Gestão financeira e investimentos', cor: '#ff9800', obrigatorio: true },
+            { id: 4, nome: 'Espiritualidade', descricao: 'Crescimento e conexão', cor: '#7e57c2', obrigatorio: true },
+            { id: 5, nome: 'Global/Básico', descricao: 'Atividades essenciais do dia a dia', cor: '#78909c', obrigatorio: true },
+        ],
+        pilaresOpcionais: [
+             { id: 6, nome: 'Carreira', descricao: 'Vida profissional e crescimento', cor: '#ef5350', obrigatorio: false },
+             { id: 7, nome: 'Desenvolvimento Pessoal', descricao: 'Crescimento individual e habilidades', cor: '#ab47bc', obrigatorio: false },
+             { id: 8, nome: 'Relacionamentos', descricao: 'Conexões sociais e amorosas', cor: '#ec407a', obrigatorio: false },
+        ],
+        tarefasGlobaisPredefinidas: [
+            { id: 'tg-1', nome: 'Acordar', tipo: 'horario', horario: '07:00' },
+            { id: 'tg-2', nome: 'Escovar os dentes (manhã)', tipo: 'manha' },
+            { id: 'tg-3', nome: 'Tomar banho (manhã)', tipo: 'manha' },
+            { id: 'tg-4', nome: 'Pequeno-almoço', tipo: 'horario', horario: '08:00' },
+            { id: 'tg-5', nome: 'Almoço', tipo: 'horario', horario: '13:00' },
+            { id: 'tg-6', nome: 'Jantar', tipo: 'horario', horario: '20:00' },
+            { id: 'tg-7', nome: 'Escovar os dentes (noite)', tipo: 'noite' },
+            { id: 'tg-8', nome: 'Dormir', tipo: 'horario', horario: '23:00' },
+        ],
+        categorias: [
+            { id: 1, pilarId: 1, nome: 'Exercício Físico' },
+            { id: 2, pilarId: 1, nome: 'Alimentação' },
+            { id: 3, pilarId: 2, nome: 'Cursos Online' },
+        ],
+        subCategorias: [
+            { id: 1, categoriaId: 1, nome: 'Corrida' },
+            { id: 2, categoriaId: 1, nome: 'Musculação' },
+        ],
+        metas: [
+            { id: 1, pilarId: 1, nome: 'Correr 5km sem parar', dataInicio: '2025-08-01', dataFim: '2025-10-31' },
+            { id: 2, pilarId: 2, nome: 'Concluir curso de JS Avançado', dataInicio: '2025-08-15', dataFim: '2025-09-30'},
+            { id: 3, pilarId: 3, nome: 'Economizar R$500', dataInicio: '2025-09-01', dataFim: '2025-09-30'}
+        ],
+        microMetas: [
+            {id: 1, metaId: 1, nome: 'Correr 1km'},
+            {id: 2, metaId: 1, nome: 'Correr 2km'},
+            {id: 3, metaId: 2, nome: 'Módulo 1-5'},
+        ],
+        tarefas: [
+            { id: 1, microMetaId: 2, nome: 'Correr 20 minutos', data: hojeString(), tipo: 'manha', horario: null, concluida: false },
+            { id: 2, microMetaId: 3, nome: 'Estudar Módulo 5', data: hojeString(), tipo: 'noite', horario: null, concluida: true },
+            { id: 3, microMetaId: 3, nome: 'Reunião do projeto', data: hojeString(), tipo: 'horario', horario: '14:30', concluida: false },
+            { id: 4, microMetaId: 1, nome: 'Treino de fortalecimento', data: amanhaString(), tipo: 'tarde', horario: null, concluida: false },
+        ]
+    };
+
+    // ===== ELEMENTOS DO DOM =====
+    const containerPagina = document.getElementById('container-pagina');
+    const linksNavegacao = document.querySelectorAll('.link-navegacao');
+    const menuLateral = document.getElementById('menu-lateral');
+
+    // ===== FUNÇÕES DE RENDERIZAÇÃO =====
+
+    function renderizarPagina() {
+        containerPagina.innerHTML = '';
+        const nomePagina = estado.paginaAtual.charAt(0).toUpperCase() + estado.paginaAtual.slice(1);
+        const acoesCabecalho = {
+            pilares: `<button class="btn btn-primario" data-acao="abrir-modal" data-modal-id="modal-pilar"><i class="fas fa-plus"></i> Novo Pilar</button>`,
+            metas: `<button class="btn btn-primario" data-acao="abrir-modal" data-modal-id="modal-meta"><i class="fas fa-plus"></i> Nova Meta</button>`,
+            tarefas: `<button class="btn btn-primario" data-acao="abrir-modal" data-modal-id="modal-tarefa"><i class="fas fa-plus"></i> Nova Tarefa</button>`,
+            dia: `<button class="btn btn-primario" data-acao="abrir-modal" data-modal-id="modal-tarefa"><i class="fas fa-plus"></i> Nova Tarefa para Hoje</button>`,
+            planeamento: `<button class="btn btn-secundario" data-acao="sugestoes-planeamento"><i class="fas fa-magic"></i> Sugestões</button> <button class="btn btn-primario"><i class="fas fa-save"></i> Guardar Semana</button>`,
+            relatorios: `<button class="btn btn-primario" data-acao="exportar-relatorio"><i class="fas fa-download"></i> Exportar Relatório</button>`,
+        };
+        
+        const funcoesRender = {
+            dashboard: renderizarDashboard,
+            dia: renderizarPaginaDoDia,
+            pilares: renderizarPaginaPilares,
+            metas: renderizarPaginaMetas,
+            tarefas: renderizarPaginaTarefas,
+            calendario: renderizarPaginaCalendario,
+            progresso: renderizarPaginaProgresso,
+            planeamento: renderizarPaginaPlaneamento,
+            relatorios: renderizarPaginaRelatorios,
+            configuracoes: renderizarPaginaConfiguracoes,
+            perfil: renderizarPaginaPerfil,
+            categoria: renderizarPaginaDetalheCategoria,
+        };
+
+        const renderFunction = funcoesRender[estado.paginaAtual] || renderizarPaginaEmConstrucao;
+        renderFunction(containerPagina, acoesCabecalho[estado.paginaAtual] || '');
+        
+        atualizarLinkAtivo();
+    }
+
+    function renderizarDashboard(container, acoes) {
+        container.innerHTML = `
+            <div class="cabecalho-pagina"><h1>Dashboard</h1><div>${acoes}</div></div>
+            <div id="conteudo-especifico"></div>
+        `;
+        const conteudo = document.getElementById('conteudo-especifico');
+
+        const tarefasHoje = estado.tarefas.filter(t => t.data === hojeString());
+        const concluidasHoje = tarefasHoje.filter(t => t.concluida).length;
+        const progressoHoje = tarefasHoje.length > 0 ? (concluidasHoje / tarefasHoje.length) * 100 : 0;
+        
+        conteudo.innerHTML = `
+            <div class="grid grid-2">
+                <!-- Coluna Esquerda -->
+                <div>
+                    <div class="card">
+                        <div class="card-header"><h3><i class="fas fa-sun"></i> Resumo do Dia</h3></div>
+                        <div class="card-body">
+                            <p>Você concluiu <strong>${concluidasHoje} de ${tarefasHoje.length}</strong> tarefas hoje.</p>
+                            <div class="progresso-barra"><div style="width:${progressoHoje}%;"></div></div>
+                        </div>
+                    </div>
+                    <div class="card mt-lg">
+                        <div class="card-header"><h3><i class="fas fa-tasks"></i> Tarefas de Hoje</h3></div>
+                        <div class="card-body" style="padding: 0;">
+                            <ul class="lista-tarefas">${tarefasHoje.length > 0 ? tarefasHoje.map(t => criarItemTarefa(t, false)).join('') : '<p class="texto-centro" style="padding: 20px;">Nenhuma tarefa para hoje. Bom descanso!</p>'}</ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Coluna Direita -->
+                <div>
+                     <div class="card">
+                        <div class="card-header"><h3><i class="fas fa-exclamation-triangle"></i> Metas Urgentes</h3></div>
+                        <div class="card-body">
+                            <p>Nenhuma meta urgente no momento.</p> <!-- Lógica a ser implementada -->
+                        </div>
+                    </div>
+                    <div class="card mt-lg">
+                        <div class="card-header"><h3><i class="fas fa-stream"></i> Progresso dos Pilares</h3></div>
+                        <div class="card-body">
+                             <canvas id="grafico-pilares-donut"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        renderizarGraficoDonutPilares();
+    }
+    
+    function renderizarPaginaDoDia(container, acoes) {
+         container.innerHTML = `
+            <div class="cabecalho-pagina"><h1>Página do Dia</h1><div>${acoes}</div></div>
+            <div id="conteudo-especifico"></div>
+        `;
+        const conteudo = document.getElementById('conteudo-especifico');
+        const tarefasDeHoje = estado.tarefas.filter(t => t.data === hojeString());
+        const tarefasPorTipo = {
+            horario: tarefasDeHoje.filter(t => t.tipo === 'horario').sort((a,b) => a.horario.localeCompare(b.horario)),
+            manha: tarefasDeHoje.filter(t => t.tipo === 'manha'),
+            tarde: tarefasDeHoje.filter(t => t.tipo === 'tarde'),
+            noite: tarefasDeHoje.filter(t => t.tipo === 'noite'),
+            arbitraria: tarefasDeHoje.filter(t => t.tipo === 'arbitraria')
+        };
+        
+        conteudo.innerHTML = `
+            <div class="container-dia">
+                ${criarSecaoDia('🕐 Horário Marcado', tarefasPorTipo.horario)}
+                ${criarSecaoDia('🌅 Manhã', tarefasPorTipo.manha)}
+                ${criarSecaoDia('☀️ Tarde', tarefasPorTipo.tarde)}
+                ${criarSecaoDia('🌙 Noite', tarefasPorTipo.noite)}
+                ${criarSecaoDia('⏰ Arbitrárias', tarefasPorTipo.arbitraria)}
+            </div>
+        `;
+    }
+
+    function renderizarPaginaPilares(container, acoes) {
+         container.innerHTML = `
+            <div class="cabecalho-pagina"><h1>Pilares</h1><div>${acoes}</div></div>
+            <div class="grid grid-3" id="container-pilares">
+                ${estado.pilares.map(pilar => {
+                    const categoriasDoPilar = estado.categorias.filter(c => c.pilarId === pilar.id);
+                    return `
+                    <div class="card card-pilar" style="border-left-color: ${pilar.cor};">
+                        <div class="card-header">
+                            <h3><i class="fas fa-stream"></i> ${pilar.nome}</h3>
+                            <div class="card-acoes">
+                                ${pilar.obrigatorio ? '<i class="fas fa-lock" title="Pilar obrigatório"></i>' : ''}
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p>${pilar.descricao || 'Sem descrição.'}</p>
+                            <h4>Categorias:</h4>
+                            <ul class="lista-sub-item">
+                                ${categoriasDoPilar.map(cat => `<li class="sub-item"><a href="#" data-acao="ver-categoria" data-id="${cat.id}">${cat.nome}</a></li>`).join('') || '<p style="font-size:0.9rem; color: var(--cor-texto-terciario);">Nenhuma categoria.</p>'}
+                            </ul>
+                             <form class="form-add-subitem" data-acao="add-categoria" data-pilar-id="${pilar.id}">
+                                <input type="text" class="campo-input" placeholder="Nova categoria..." required>
+                                <button type="submit" class="btn btn-primario btn-pequeno"><i class="fas fa-plus"></i></button>
+                            </form>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-secundario btn-pequeno" data-acao="editar-pilar" data-id="${pilar.id}"><i class="fas fa-edit"></i> Editar</button>
+                            ${!pilar.obrigatorio ? `<button class="btn btn-perigo btn-pequeno" data-acao="excluir-pilar" data-id="${pilar.id}"><i class="fas fa-trash"></i> Excluir</button>` : ''}
+                        </div>
+                    </div>
+                `}).join('')}
+            </div>
+        `;
+    }
+
+    function renderizarPaginaDetalheCategoria(container) {
+        const categoria = encontrarPorId(estado.categorias, estado.paginaDetalheId);
+        const pilar = encontrarPorId(estado.pilares, categoria.pilarId);
+        const subCategorias = estado.subCategorias.filter(sc => sc.categoriaId === categoria.id);
+        
+        container.innerHTML = `
+             <div class="cabecalho-pagina">
+                <div>
+                    <div class="breadcrumb">
+                        <a href="#" data-pagina="pilares" class="link-navegacao">Pilares</a> / <span>${pilar.nome}</span>
+                    </div>
+                    <h1>Categoria: ${categoria.nome}</h1>
+                </div>
+                <div>
+                    <button class="btn btn-secundario" data-acao="editar-item" data-id="${categoria.id}" data-tipo="categoria"><i class="fas fa-edit"></i> Editar</button>
+                    <button class="btn btn-perigo" data-acao="excluir-item" data-id="${categoria.id}" data-tipo="categoria"><i class="fas fa-trash"></i> Excluir</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3><i class="fas fa-sitemap"></i> Subcategorias</h3></div>
+                <div class="card-body">
+                    <ul class="lista-sub-item">
+                       ${subCategorias.map(sc => `<li class="sub-item"><span>${sc.nome}</span> <button class="btn btn-icone btn-pequeno" data-acao="excluir-item" data-id="${sc.id}" data-tipo="subcategoria"><i class="fas fa-trash"></i></button></li>`).join('') || '<p>Nenhuma subcategoria.</p>'}
+                    </ul>
+                     <form class="form-add-subitem" data-acao="add-subcategoria" data-categoria-id="${categoria.id}">
+                        <input type="text" class="campo-input" placeholder="Nova subcategoria..." required>
+                        <button type="submit" class="btn btn-primario"><i class="fas fa-plus"></i> Adicionar</button>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+    
+    function renderizarPaginaMetas(container, acoes) {
+        container.innerHTML = `
+            <div class="cabecalho-pagina"><h1>Metas</h1><div>${acoes}</div></div>
+            <div class="grid grid-3" id="container-metas">
+                ${estado.metas.map(meta => {
+                    const pilar = encontrarPorId(estado.pilares, meta.pilarId);
+                    const microMetasDaMeta = estado.microMetas.filter(mm => mm.metaId === meta.id);
+                    return `
+                    <div class="card card-pilar" style="border-left-color: ${pilar ? pilar.cor : '#ccc'};">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bullseye"></i> ${meta.nome}</h3>
+                        </div>
+                        <div class="card-body">
+                           <p><strong><i class="fas fa-stream"></i> Pilar:</strong> ${pilar ? pilar.nome : 'N/A'}</p>
+                           <p><strong><i class="fas fa-calendar-alt"></i> Prazo:</strong> ${formatarData(meta.dataInicio)} a ${formatarData(meta.dataFim)}</p>
+                           <h4>Micro-metas:</h4>
+                            <ul class="lista-sub-item">
+                                ${microMetasDaMeta.map(mm => `<li class="sub-item"><span>${mm.nome}</span> <div> <button class="btn btn-icone btn-pequeno" data-acao="editar-item" data-id="${mm.id}" data-tipo="micrometa"><i class="fas fa-edit"></i></button> <button class="btn btn-icone btn-pequeno" data-acao="excluir-item" data-id="${mm.id}" data-tipo="micrometa"><i class="fas fa-trash"></i></button></div></li>`).join('') || '<p style="font-size:0.9rem; color: var(--cor-texto-terciario);">Nenhuma micro-meta.</p>'}
+                            </ul>
+                            <form class="form-add-subitem" data-acao="add-micrometa" data-meta-id="${meta.id}">
+                                <input type="text" class="campo-input" placeholder="Nova micro-meta..." required>
+                                <button type="submit" class="btn btn-primario btn-pequeno"><i class="fas fa-plus"></i></button>
+                            </form>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-secundario btn-pequeno" data-acao="editar-meta" data-id="${meta.id}"><i class="fas fa-edit"></i> Editar</button>
+                            <button class="btn btn-perigo btn-pequeno" data-acao="excluir-meta" data-id="${meta.id}"><i class="fas fa-trash"></i> Excluir</button>
+                        </div>
+                    </div>
+                `}).join('')}
+            </div>
+        `;
+    }
+
+    function renderizarPaginaTarefas(container, acoes) {
+        container.innerHTML = `
+            <div class="cabecalho-pagina"><h1>Tarefas</h1><div>${acoes}</div></div>
+            <div class="card">
+                <div class="card-body" style="padding: 0;">
+                    <ul class="lista-tarefas">
+                        ${estado.tarefas.sort((a,b) => new Date(b.data) - new Date(a.data)).map(tarefa => criarItemTarefa(tarefa, true)).join('')}
+                    </ul>
+                </div>
+            </div>
+        `;
+    }
+    
+    function renderizarPaginaCalendario(container, acoes) {
+        const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+        const primeiroDia = new Date(estado.anoCalendario, estado.mesCalendario, 1).getDay();
+        const diasNoMes = new Date(estado.anoCalendario, estado.mesCalendario + 1, 0).getDate();
+        const diaAtual = new Date();
+
+        let diasHtml = '';
+        for (let i = 0; i < primeiroDia; i++) {
+            diasHtml += `<div class="dia-calendario outro-mes"></div>`;
+        }
+        for (let dia = 1; dia <= diasNoMes; dia++) {
+            let classe = 'dia-calendario';
+            if (dia === diaAtual.getDate() && estado.mesCalendario === diaAtual.getMonth() && estado.anoCalendario === diaAtual.getFullYear()) {
+                classe += ' hoje';
+            }
+            if (dia === 18) classe += ' sucesso-completo';
+            if (dia === 19) classe += ' sucesso-parcial';
+            diasHtml += `<div class="${classe}"><span>${dia}</span></div>`;
+        }
+
+        container.innerHTML = `
+            <div class="cabecalho-pagina"><h1>Calendário</h1><div>${acoes}</div></div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="cabecalho-calendario">
+                        <div class="campo-grupo">
+                           <select id="filtro-meta-calendario" class="campo-select">
+                                <option value="">Filtrar por Meta...</option>
+                           </select>
+                        </div>
+                        <div style="display:flex; align-items:center; gap: 10px;">
+                            <button class="btn btn-icone" data-acao="mes-anterior"><i class="fas fa-chevron-left"></i></button>
+                            <h3>${nomesMeses[estado.mesCalendario]} ${estado.anoCalendario}</h3>
+                            <button class="btn btn-icone" data-acao="mes-seguinte"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    <div class="grid" style="grid-template-columns: repeat(7, 1fr);">
+                        <div class="header-calendario">Dom</div><div class="header-calendario">Seg</div><div class="header-calendario">Ter</div><div class="header-calendario">Qua</div><div class="header-calendario">Qui</div><div class="header-calendario">Sex</div><div class="header-calendario">Sáb</div>
+                    </div>
+                    <div class="container-calendario">${diasHtml}</div>
+                </div>
+            </div>
+        `;
+        preencherSelect('filtro-meta-calendario', estado.metas);
+    }
+    
+    function renderizarPaginaProgresso(container, acoes) {
+        container.innerHTML = `
+            <div class="cabecalho-pagina"><h1>Progresso</h1><div>${acoes}</div></div>
+             <div class="grid grid-2">
+                <div class="card">
+                    <div class="card-header"><h3><i class="fas fa-chart-line"></i> Conclusão de Tarefas (Últimos 7 dias)</h3></div>
+                    <div class="card-body"><canvas id="grafico-progresso-linha"></canvas></div>
+                </div>
+                 <div class="card">
+                    <div class="card-header"><h3><i class="fas fa-balance-scale"></i> Balanço dos Pilares</h3></div>
+                    <div class="card-body"><canvas id="grafico-pilares-radar"></canvas></div>
+                </div>
+            </div>
+        `;
+        renderizarGraficoLinhaProgresso();
+        renderizarGraficoRadarPilares();
+    }
+
+    function renderizarPaginaPerfil(container) {
+        container.innerHTML = `
+            <div class="cabecalho-pagina"><h1>Perfil</h1></div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="perfil-container">
+                        <div class="perfil-avatar">
+                            <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="Avatar do Usuário">
+                            <button class="btn btn-primario btn-pequeno">Alterar Foto</button>
+                        </div>
+                        <div class="perfil-info">
+                            <h2>Nome do Usuário</h2>
+                            <p>Email: usuario@avancar.com</p>
+                            <hr style="border-color: var(--cor-bordas); margin: var(--espacamento-lg) 0;">
+                            <h3>Estatísticas Gerais</h3>
+                            <div class="grid grid-3 mt-lg">
+                                <div class="stat-item"><div class="stat-valor">128</div><div class="stat-label">Tarefas Concluídas</div></div>
+                                <div class="stat-item"><div class="stat-valor">12</div><div class="stat-label">Dias de Streak</div></div>
+                                <div class="stat-item"><div class="stat-valor">8</div><div class="stat-label">Conquistas</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    function renderizarPaginaConfiguracoes(container) {
+        container.innerHTML = `
+            <div class="cabecalho-pagina"><h1>Configurações</h1></div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="config-item">
+                        <div>
+                            <h4>Notificações por Email</h4>
+                            <p style="font-size:0.9rem; color:var(--cor-texto-terciario)">Receber resumos e alertas no seu email.</p>
+                        </div>
+                        <input type="checkbox" class="checkbox-tarefa" checked>
+                    </div>
+                    <div class="config-item">
+                        <div>
+                            <h4>Tema Escuro</h4>
+                            <p style="font-size:0.9rem; color:var(--cor-texto-terciario)">Atualmente ativo.</p>
+                        </div>
+                        <input type="checkbox" class="checkbox-tarefa" checked disabled>
+                    </div>
+                     <div class="config-item">
+                        <div>
+                            <h4>Exportar Dados</h4>
+                            <p style="font-size:0.9rem; color:var(--cor-texto-terciario)">Faça o backup de todos os seus dados.</p>
+                        </div>
+                        <button class="btn btn-secundario"><i class="fas fa-download"></i> Exportar</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    function renderizarPaginaPlaneamento(container, acoes) {
+        const diasDaSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+        container.innerHTML = `
+            <div class="cabecalho-pagina">
+                <h1>Planeamento Semanal</h1>
+                <div>${acoes}</div>
+            </div>
+            <div class="container-planeamento">
+                ${diasDaSemana.map((dia, index) => `
+                    <div class="dia-semana" style="border-top-color: hsl(${index * 50}, 70%, 50%)">
+                        <div class="dia-semana-header">
+                            <h4>${dia}</h4>
+                        </div>
+                        <div class="dia-semana-body">
+                            ${index === 1 ? `
+                                <div class="tarefa-planeamento" draggable="true" style="border-left-color: ${estado.pilares[0].cor};">Correr 20 min</div>
+                                <div class="tarefa-planeamento" draggable="true" style="border-left-color: ${estado.pilares[1].cor};">Estudar Módulo 5</div>
+                            ` : ''}
+                             ${index === 2 ? `
+                                <div class="tarefa-planeamento" draggable="true" style="border-left-color: ${estado.pilares[0].cor};">Treino de força</div>
+                            ` : ''}
+                            <div class="tarefa-planeamento-placeholder">
+                                <i class="fas fa-plus"></i>
+                                <p>Arraste tarefas aqui</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    function renderizarPaginaRelatorios(container, acoes) {
+        container.innerHTML = `
+            <div class="cabecalho-pagina">
+                <h1>Relatórios e Análises</h1>
+                <div>${acoes}</div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-filter"></i> Filtros do Relatório</h3>
+                </div>
+                <div class="card-body">
+                    <div class="grid grid-3">
+                        <div class="campo-grupo">
+                            <label class="campo-label">Período</label>
+                            <select class="campo-select" id="filtro-relatorio-periodo">
+                                <option value="7d">Últimos 7 dias</option>
+                                <option value="30d" selected>Últimos 30 dias</option>
+                                <option value="mes_atual">Este Mês</option>
+                                <option value="mes_passado">Mês Passado</option>
+                            </select>
+                        </div>
+                        <div class="campo-grupo">
+                            <label class="campo-label">Pilar</label>
+                            <select class="campo-select" id="filtro-relatorio-pilar">
+                                <option value="todos">Todos os Pilares</option>
+                                ${estado.pilares.map(p => `<option value="${p.id}">${p.nome}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="campo-grupo">
+                            <label class="campo-label">Tipo de Relatório</label>
+                            <select class="campo-select" id="filtro-relatorio-tipo">
+                                <option value="produtividade">Produtividade Geral</option>
+                                <option value="padroes">Análise de Padrões</option>
+                                <option value="balanco">Balanço de Pilares</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-lg">
+                 <div class="card-header">
+                    <h3 id="relatorio-titulo"><i class="fas fa-chart-bar"></i> Visualização do Relatório</h3>
+                </div>
+                <div class="card-body">
+                     <div class="grid grid-3" id="relatorio-sumario">
+                         <!-- O sumário será injetado aqui -->
+                     </div>
+                    <canvas id="grafico-relatorio-produtividade" style="margin-top:20px;"></canvas>
+                </div>
+                 <div class="card-footer" style="justify-content:space-between; align-items:center;">
+                    <p id="relatorio-data-geracao" style="font-size:0.9rem; color: var(--cor-texto-terciario)"></p>
+                 </div>
+            </div>
+        `;
+        atualizarVisaoRelatorio();
+    }
+    
+    function renderizarPaginaEmConstrucao(container, acoes) {
+        container.innerHTML = `
+            <div class="cabecalho-pagina"><h1>Página em Construção</h1><div>${acoes}</div></div>
+            <div class="card">
+                <div class="card-body texto-centro" style="padding: 50px;">
+                    <i class="fas fa-tools fa-3x" style="color: var(--cor-aviso); margin-bottom: 20px;"></i>
+                    <h2>Em Breve</h2>
+                    <p>Esta funcionalidade está a ser desenvolvida para melhorar a sua experiência.</p>
+                </div>
+            </div>
+        `;
+    }
+    
+
+
+    // ===== FUNÇÕES AUXILIARES DE RENDERIZAÇÃO =====
+    function criarSecaoDia(titulo, tarefas) {
+        if (tarefas.length === 0) return '';
+        return `
+            <div class="secao-dia">
+                <h3>${titulo}</h3>
+                <ul class="lista-tarefas">
+                    ${tarefas.map(tarefa => criarItemTarefa(tarefa, false)).join('')}
+                </ul>
+            </div>
+        `;
+    }
+    
+    function criarItemTarefa(tarefa, mostrarData = false) {
+        const microMeta = encontrarPorId(estado.microMetas, tarefa.microMetaId);
+        const meta = microMeta ? encontrarPorId(estado.metas, microMeta.metaId) : null;
+        const pilar = meta ? encontrarPorId(estado.pilares, meta.pilarId) : null;
+        return `
+            <li class="item-tarefa ${tarefa.concluida ? 'concluida' : ''}" style="border-left-color: ${pilar ? pilar.cor : '#ccc'}">
+                <input type="checkbox" class="checkbox-tarefa" data-acao="alternar-tarefa" data-id="${tarefa.id}" ${tarefa.concluida ? 'checked' : ''}>
+                <div class="info-tarefa">
+                    <div class="titulo-tarefa">${tarefa.nome}</div>
+                    <div class="detalhes-tarefa">${microMeta ? microMeta.nome : 'Sem micro-meta'}</div>
+                </div>
+                <div class="horario-tarefa">
+                    ${mostrarData ? `<span>${formatarData(tarefa.data)}</span>` : ''}
+                    ${tarefa.horario ? `<span>${tarefa.horario}</span>` : ''}
+                </div>
+            </li>
+        `;
+    }
+    
+    function renderizarGraficoDonutPilares() {
+        const ctx = document.getElementById('grafico-pilares-donut')?.getContext('2d');
+        if (!ctx) return;
+
+        const labels = estado.pilares.map(p => p.nome);
+        const data = estado.pilares.map(pilar => {
+            const metasDoPilar = estado.metas.filter(m => m.pilarId === pilar.id).map(m => m.id);
+            const microMetasDoPilar = estado.microMetas.filter(mm => metasDoPilar.includes(mm.metaId)).map(mm => mm.id);
+            return estado.tarefas.filter(t => microMetasDoPilar.includes(t.microMetaId) && t.concluida).length;
+        });
+        const colors = estado.pilares.map(p => p.cor);
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Tarefas Concluídas',
+                    data: data,
+                    backgroundColor: colors,
+                    borderColor: 'var(--cor-fundo-secundario)',
+                    borderWidth: 3
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { position: 'top', labels: { color: 'white' } } } }
+        });
+    }
+
+    function renderizarGraficoLinhaProgresso() {
+        const ctx = document.getElementById('grafico-progresso-linha')?.getContext('2d');
+        if (!ctx) return;
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['D-6', 'D-5', 'D-4', 'D-3', 'D-2', 'Ontem', 'Hoje'],
+                datasets: [{
+                    label: 'Tarefas Concluídas',
+                    data: [5, 6, 4, 7, 5, 8, estado.tarefas.filter(t=>t.data === hojeString() && t.concluida).length],
+                    borderColor: 'var(--cor-primaria)',
+                    backgroundColor: 'rgba(107, 70, 193, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: 'white' } }, x: { ticks: { color: 'white' } } } }
+        });
+    }
+
+    function renderizarGraficoRadarPilares() {
+        const ctx = document.getElementById('grafico-pilares-radar')?.getContext('2d');
+        if (!ctx) return;
+        const labels = estado.pilares.map(p => p.nome);
+        const data = estado.pilares.map(pilar => {
+             const metasDoPilar = estado.metas.filter(m => m.pilarId === pilar.id).map(m => m.id);
+            const microMetasDoPilar = estado.microMetas.filter(mm => metasDoPilar.includes(mm.metaId)).map(mm => mm.id);
+            return estado.tarefas.filter(t => microMetasDoPilar.includes(t.microMetaId)).length; // Total de tarefas planejadas
+        });
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Nº de Tarefas Planejadas',
+                    data: data,
+                    borderColor: 'var(--cor-sucesso)',
+                    backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                }]
+            },
+            options: { responsive: true, scales: { r: { ticks: { backdropColor: 'transparent', color: 'white' }, pointLabels: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.2)' } } }, plugins: { legend: { labels: { color: 'white' } } } }
+        });
+    }
+    
+    function atualizarVisaoRelatorio() {
+        const periodoEl = document.getElementById('filtro-relatorio-periodo');
+        const pilarEl = document.getElementById('filtro-relatorio-pilar');
+        const tipoEl = document.getElementById('filtro-relatorio-tipo');
+        if(!periodoEl || !pilarEl || !tipoEl) return;
+
+        const pilarId = pilarEl.value;
+        
+        // 1. Atualizar Título
+        const pilarSelecionado = estado.pilares.find(p => p.id == pilarId);
+        const tituloPilar = pilarId === 'todos' ? 'Geral' : pilarSelecionado.nome;
+        document.getElementById('relatorio-titulo').innerHTML = `<i class="fas fa-chart-bar"></i> Produtividade: ${tituloPilar}`;
+        
+        // 2. Simular novos dados com base nos filtros
+        const tarefasConcluidas = Math.floor(Math.random() * (50 - 20 + 1)) + 20;
+        const totalTarefas = tarefasConcluidas + Math.floor(Math.random() * 10);
+        const taxaSucesso = totalTarefas > 0 ? ((tarefasConcluidas / totalTarefas) * 100).toFixed(1) : 0;
+        const pilarMaisForte = estado.pilares[Math.floor(Math.random()*estado.pilares.length)].nome;
+
+        // 3. Atualizar Sumário
+        const sumarioContainer = document.getElementById('relatorio-sumario');
+        sumarioContainer.innerHTML = `
+            <div class="stat-item"><div class="stat-valor">${tarefasConcluidas}</div><div class="stat-label">Tarefas Concluídas</div></div>
+            <div class="stat-item"><div class="stat-valor">${taxaSucesso}%</div><div class="stat-label">Taxa de Sucesso</div></div>
+            <div class="stat-item"><div class="stat-valor">${pilarMaisForte}</div><div class="stat-label">Pilar de Destaque</div></div>
+        `;
+        
+        document.getElementById('relatorio-data-geracao').textContent = `Relatório gerado em: ${new Date().toLocaleString('pt-BR')}`;
+
+        // 4. Atualizar Gráfico
+        const labels = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'];
+        const dataConcluidas = labels.map(() => Math.floor(Math.random() * (15 - 5 + 1)) + 5);
+        const dataPlaneadas = dataConcluidas.map(v => v + Math.floor(Math.random() * 3));
+        renderizarGraficoRelatorio(labels, dataConcluidas, dataPlaneadas);
+    }
+
+    function renderizarGraficoRelatorio(labels, dataConcluidas, dataPlaneadas) {
+        const ctx = document.getElementById('grafico-relatorio-produtividade')?.getContext('2d');
+        if (!ctx) return;
+        
+        if(window.graficoRelatorio instanceof Chart) {
+            window.graficoRelatorio.destroy();
+        }
+
+        window.graficoRelatorio = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels || ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+                datasets: [{
+                    label: 'Tarefas Concluídas',
+                    data: dataConcluidas || [25, 32, 28, 35],
+                    backgroundColor: 'var(--cor-sucesso)',
+                }, {
+                    label: 'Tarefas Planeadas',
+                    data: dataPlaneadas || [30, 35, 32, 40],
+                    backgroundColor: 'var(--cor-hover)',
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { labels: { color: 'white' } } }, scales: { y: { beginAtZero: true, ticks: { color: 'white' } }, x: { ticks: { color: 'white' } } } }
+        });
+    }
+
+
+    // ===== LÓGICA DE CRUD (SIMULADA) =====
+    
+    function getArrayPorTipo(tipo) {
+        if (tipo === 'subcategoria') return estado.subCategorias;
+        if (tipo === 'micrometa') return estado.microMetas;
+        return estado[tipo + 's'];
+    }
+
+    function salvarPilar(dados) {
+        if (dados.id) { // Atualização
+            const indice = estado.pilares.findIndex(p => p.id == dados.id);
+            if (indice > -1) Object.assign(estado.pilares[indice], dados);
+        } else { // Criação
+            const novoId = Math.max(0, ...estado.pilares.map(p => p.id), ...estado.pilaresOpcionais.map(p => p.id)) + 1;
+            estado.pilares.push({ ...dados, id: novoId });
+        }
+        renderizarPagina();
+        notificacao('Sucesso!', 'Pilar salvo com sucesso.', 'success');
+    }
+
+    function excluirPilar(id) {
+        // Lógica de exclusão em cascata...
+        renderizarPagina();
+        notificacao('Excluído!', 'Pilar e todos os seus dados associados foram excluídos.', 'success');
+    }
+    
+    function salvarMeta(dados) {
+        if (dados.id) { // Atualização
+            const indice = estado.metas.findIndex(m => m.id == dados.id);
+            if (indice > -1) Object.assign(estado.metas[indice], dados);
+        } else { // Criação
+            const novoId = Math.max(0, ...estado.metas.map(m => m.id)) + 1;
+            estado.metas.push({ ...dados, id: novoId });
+        }
+        renderizarPagina();
+        notificacao('Sucesso!', 'Meta salva com sucesso.', 'success');
+    }
+
+    function excluirMeta(id) {
+        // Lógica de exclusão em cascata...
+        renderizarPagina();
+        notificacao('Excluído!', 'Meta e seus dados associados foram excluídos.', 'success');
+    }
+
+    function salvarItem(tipo, dados) {
+        const array = getArrayPorTipo(tipo);
+        if (!array) return;
+
+        if (dados.id) {
+            const indice = array.findIndex(i => i.id == dados.id);
+            if (indice > -1) Object.assign(array[indice], dados);
+        } else {
+            const novoId = Math.max(0, ...array.map(i => i.id).filter(Number.isFinite)) + 1;
+            array.push({ ...dados, id: novoId });
+        }
+        renderizarPagina();
+        notificacao('Sucesso!', `${tipo.charAt(0).toUpperCase() + tipo.slice(1)} salvo com sucesso.`, 'success');
+    }
+    
+    function excluirItem(tipo, id) {
+        const array = getArrayPorTipo(tipo);
+        if (!array) return;
+    
+        const novoArray = array.filter(i => i.id != id);
+    
+        if (tipo === 'subcategoria') {
+            estado.subCategorias = novoArray;
+        } else if (tipo === 'micrometa') {
+            estado.microMetas = novoArray;
+            estado.tarefas = estado.tarefas.filter(t => t.microMetaId != id);
+        } else if (tipo === 'categoria') {
+            estado.categorias = novoArray;
+            estado.subCategorias = estado.subCategorias.filter(sc => sc.categoriaId != id);
+        } else {
+            estado[tipo + 's'] = novoArray;
+        }
+        
+        renderizarPagina();
+        notificacao('Excluído!', 'Item excluído.', 'success');
+    }
+    
+    function salvarTarefa(dados) {
+        if (dados.id) {
+            const indice = estado.tarefas.findIndex(t => t.id == dados.id);
+            if (indice > -1) Object.assign(estado.tarefas[indice], dados);
+        } else {
+            const novoId = Math.max(0, ...estado.tarefas.map(t => t.id)) + 1;
+            estado.tarefas.push({ ...dados, id: novoId, concluida: false });
+        }
+        renderizarPagina();
+        notificacao('Sucesso!', 'Tarefa salva com sucesso.', 'success');
+    }
+
+    function alternarStatusTarefa(id) {
+        const tarefa = encontrarPorId(estado.tarefas, id);
+        if (tarefa) tarefa.concluida = !tarefa.concluida;
+        renderizarPagina();
+    }
+
+    // ===== MANIPULADORES DE EVENTOS =====
+    
+    document.querySelector('.menu-navegacao').addEventListener('click', e => {
+        const link = e.target.closest('.link-navegacao');
+        if (link) {
+            e.preventDefault();
+            estado.paginaAtual = link.dataset.pagina;
+            renderizarPagina();
+            if(window.innerWidth <= 768) menuLateral.classList.remove('aberto');
+        }
+        
+        const grupoTitulo = e.target.closest('.grupo-titulo');
+        if (grupoTitulo) {
+            grupoTitulo.parentElement.classList.toggle('recolhido');
+        }
+    });
+
+    document.body.addEventListener('click', (e) => {
+        const alvo = e.target.closest('[data-acao]');
+        if (!alvo) return;
+        
+        const acao = alvo.dataset.acao;
+        const id = alvo.dataset.id;
+        
+        const acoes = {
+            'abrir-modal': () => abrirModal(alvo.dataset.modalId),
+            'editar-pilar': () => preencherModalPilar(id),
+            'excluir-pilar': () => confirmarExclusao('pilar', id),
+            'editar-meta': () => preencherModalMeta(id),
+            'excluir-meta': () => confirmarExclusao('meta', id),
+            'ver-categoria': () => { estado.paginaAtual = 'categoria'; estado.paginaDetalheId = id; renderizarPagina(); },
+            'editar-item': () => preencherModalEdicaoItem(alvo.dataset.tipo, id),
+            'excluir-item': () => confirmarExclusao(alvo.dataset.tipo, id),
+            'alternar-tarefa': () => {
+                if(e.target.tagName === 'INPUT') alternarStatusTarefa(id);
+            },
+            'mes-anterior': () => {
+                if (estado.mesCalendario === 0) { estado.mesCalendario = 11; estado.anoCalendario--; } 
+                else { estado.mesCalendario--; }
+                renderizarPagina();
+            },
+            'mes-seguinte': () => {
+                if (estado.mesCalendario === 11) { estado.mesCalendario = 0; estado.anoCalendario++; } 
+                else { estado.mesCalendario++; }
+                renderizarPagina();
+            },
+            'sugestoes-planeamento': () => {
+                Swal.fire({
+                    title: 'Sugestão de Planeamento',
+                    html: `Com base no seu histórico, sugerimos focar em <strong>Saúde</strong> amanhã e <strong>Educação</strong> na quarta-feira.<br><br>Deseja adicionar tarefas relacionadas?`,
+                    icon: 'info', showCancelButton: true, confirmButtonText: 'Sim, adicionar!', cancelButtonText: 'Não, obrigado',
+                    background: 'var(--cor-fundo-secundario)', color: 'var(--cor-texto-principal)'
+                });
+            },
+             'exportar-relatorio': () => notificacao('Em desenvolvimento', 'A funcionalidade de exportação de relatórios estará disponível em breve.', 'info')
+        };
+        
+        if (acoes[acao]) {
+            e.preventDefault();
+            acoes[acao]();
+        }
+    });
+
+    document.body.addEventListener('submit', e => {
+        const form = e.target;
+        if (!form.matches('form[data-acao]')) return;
+        e.preventDefault();
+        
+        const acao = form.dataset.acao;
+        const input = form.querySelector('input[type="text"]');
+        
+        if (acao === 'add-categoria') {
+            salvarItem('categoria', { pilarId: parseInt(form.dataset.pilarId), nome: input.value });
+        }
+        if (acao === 'add-micrometa') {
+            salvarItem('microMeta', { metaId: parseInt(form.dataset.metaId), nome: input.value });
+        }
+        if (acao === 'add-subcategoria') {
+            salvarItem('subCategoria', { categoriaId: parseInt(form.dataset.categoriaId), nome: input.value });
+        }
+        form.reset();
+    });
+
+    containerPagina.addEventListener('change', e => {
+        if (e.target.matches('#filtro-relatorio-periodo, #filtro-relatorio-pilar, #filtro-relatorio-tipo')) {
+            atualizarVisaoRelatorio();
+        }
+    });
+
+    document.querySelectorAll('.btn-fechar-modal').forEach(btn => {
+        btn.addEventListener('click', () => fecharModal(btn.dataset.modalId));
+    });
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', e => {
+            if (e.target === modal) fecharModal(modal.id);
+        });
+    });
+    
+    document.getElementById('formulario-pilar').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const dados = {
+            id: document.getElementById('pilar-id').value,
+            nome: document.getElementById('pilar-nome').value,
+            descricao: document.getElementById('pilar-descricao').value,
+            cor: document.getElementById('pilar-cor').value,
+        };
+        salvarPilar(dados);
+        fecharModal('modal-pilar');
+    });
+    
+    document.getElementById('formulario-meta').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const dados = {
+            id: document.getElementById('meta-id').value,
+            nome: document.getElementById('meta-nome').value,
+            pilarId: parseInt(document.getElementById('meta-pilar').value),
+            dataInicio: document.getElementById('meta-data-inicio').value,
+            dataFim: document.getElementById('meta-data-fim').value,
+        };
+        salvarMeta(dados);
+        fecharModal('modal-meta');
+    });
+
+    document.getElementById('formulario-tarefa').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const dados = {
+            id: document.getElementById('tarefa-id').value,
+            nome: document.getElementById('tarefa-nome').value,
+            microMetaId: parseInt(document.getElementById('tarefa-micrometa').value),
+            data: document.getElementById('tarefa-data').value,
+            tipo: document.getElementById('tarefa-tipo').value,
+            horario: document.getElementById('tarefa-tipo').value === 'horario' ? document.getElementById('tarefa-horario').value : null,
+        };
+        salvarTarefa(dados);
+        fecharModal('modal-tarefa');
+    });
+    
+    document.getElementById('formulario-edicao-item').addEventListener('submit', e => {
+        e.preventDefault();
+        const id = document.getElementById('edicao-item-id').value;
+        const tipo = document.getElementById('edicao-item-tipo').value;
+        const nome = document.getElementById('edicao-item-nome').value;
+        salvarItem(tipo, { id, nome });
+        fecharModal('modal-edicao-item');
+    });
+
+    document.getElementById('tarefa-tipo').addEventListener('change', (e) => {
+        document.getElementById('campo-horario-fixo').classList.toggle('display-none', e.target.value !== 'horario');
+    });
+    
+    document.getElementById('botao-hamburguer').addEventListener('click', () => {
+        menuLateral.classList.toggle('aberto');
+    });
+
+    // ===== FUNÇÕES DE MODAL E FORMULÁRIOS =====
+    function abrirModal(id) {
+        if (id === 'modal-pilar') {
+            document.getElementById('modal-pilar-titulo').textContent = 'Novo Pilar';
+            document.getElementById('formulario-pilar').reset();
+            document.getElementById('pilar-id').value = '';
+        } else if (id === 'modal-meta') {
+            document.getElementById('modal-meta-titulo').textContent = 'Nova Meta';
+            document.getElementById('formulario-meta').reset();
+            document.getElementById('meta-id').value = '';
+            preencherSelect('meta-pilar', estado.pilares);
+        } else if (id === 'modal-tarefa') {
+            document.getElementById('modal-tarefa-titulo').textContent = 'Nova Tarefa';
+            document.getElementById('formulario-tarefa').reset();
+            document.getElementById('tarefa-id').value = '';
+            document.getElementById('tarefa-data').value = hojeString();
+            preencherSelect('tarefa-micrometa', estado.microMetas);
+            document.getElementById('campo-horario-fixo').classList.add('display-none');
+        }
+        document.getElementById(id).classList.add('visivel');
+    }
+    
+    function fecharModal(id) {
+        document.getElementById(id).classList.remove('visivel');
+    }
+    
+    function preencherModalPilar(id) {
+        const pilar = encontrarPorId(estado.pilares, id);
+        if (pilar) {
+            document.getElementById('modal-pilar-titulo').textContent = 'Editar Pilar';
+            document.getElementById('pilar-id').value = pilar.id;
+            document.getElementById('pilar-nome').value = pilar.nome;
+            document.getElementById('pilar-descricao').value = pilar.descricao;
+            document.getElementById('pilar-cor').value = pilar.cor;
+            abrirModal('modal-pilar');
+        }
+    }
+    
+    function preencherModalMeta(id) {
+        const meta = encontrarPorId(estado.metas, id);
+        if (meta) {
+            document.getElementById('modal-meta-titulo').textContent = 'Editar Meta';
+            preencherSelect('meta-pilar', estado.pilares, meta.pilarId);
+            document.getElementById('meta-id').value = meta.id;
+            document.getElementById('meta-nome').value = meta.nome;
+            document.getElementById('meta-data-inicio').value = meta.dataInicio;
+            document.getElementById('meta-data-fim').value = meta.dataFim;
+            abrirModal('modal-meta');
+        }
+    }
+
+    function preencherModalEdicaoItem(tipo, id) {
+        const array = getArrayPorTipo(tipo);
+        const item = encontrarPorId(array, id);
+
+        if(item) {
+            const tipoCapitalizado = tipo === 'micrometa' ? 'Micro-meta' : tipo.charAt(0).toUpperCase() + tipo.slice(1);
+            document.getElementById('modal-edicao-titulo').textContent = `Editar ${tipoCapitalizado}`;
+            document.getElementById('edicao-item-id').value = item.id;
+            document.getElementById('edicao-item-tipo').value = tipo;
+            document.getElementById('edicao-item-nome').value = item.nome;
+            abrirModal('modal-edicao-item');
+        }
+    }
+
+    // ===== LÓGICA DE ONBOARDING =====
+    function renderizarEtapaOnboarding() {
+        const { etapaAtual } = estado.onboarding;
+
+        // Atualiza os indicadores de passo (stepper)
+        document.querySelectorAll('.onboarding-step').forEach((el, index) => {
+            el.classList.toggle('ativo', index + 1 === etapaAtual);
+        });
+
+        // Mostra o conteúdo da etapa atual e esconde os outros
+        document.querySelectorAll('.step-content').forEach((el, index) => {
+            el.classList.toggle('ativo', index + 1 === etapaAtual);
+        });
+
+        const btnAnterior = document.getElementById('btn-onboarding-anterior');
+        const btnProximo = document.getElementById('btn-onboarding-proximo');
+        
+        btnAnterior.classList.toggle('display-none', etapaAtual === 1);
+        btnProximo.innerHTML = 'Próximo <i class="fas fa-arrow-right"></i>';
+
+        if (etapaAtual === 3) {
+            // Carrega o conteúdo para a etapa de categorias
+            const container = document.getElementById('configuracao-categorias-iniciais');
+            const pilaresSelecionados = [...estado.pilares.filter(p => p.obrigatorio), ...estado.onboarding.pilaresSelecionados];
+            container.innerHTML = pilaresSelecionados.map(p => `
+                <div class="pilar-categoria-setup">
+                    <h5 style="color: ${p.cor};">${p.nome}</h5>
+                    <div class="form-add-subitem">
+                        <input type="text" class="campo-input" placeholder="Nova categoria para ${p.nome}..." data-pilar-id-onboarding="${p.id}">
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        if (etapaAtual === 4) {
+            btnProximo.innerHTML = 'Concluir <i class="fas fa-check"></i>';
+        }
+    }
+
+    function navegarOnboarding(direcao) {
+        let { etapaAtual } = estado.onboarding;
+        if (direcao === 'proximo' && etapaAtual < 4) {
+            estado.onboarding.etapaAtual++;
+        } else if (direcao === 'anterior' && etapaAtual > 1) {
+            estado.onboarding.etapaAtual--;
+        }
+        renderizarEtapaOnboarding();
+    }
+    
+    function iniciarOnboarding() {
+        if (localStorage.getItem('avancarOnboardingConcluido')) return;
+        
+        // Etapa 1: Pilares Opcionais
+        const containerSelecao = document.getElementById('selecao-pilares-opcionais');
+        containerSelecao.innerHTML = estado.pilaresOpcionais.map(pilar => `
+            <div class="card card-clicavel" data-pilar-opcional-id="${pilar.id}">
+                <div class="card-body texto-centro">
+                    <h4 style="color:${pilar.cor};"><i class="fas fa-stream"></i> ${pilar.nome}</h4>
+                    <p style="font-size: 0.8rem;">${pilar.descricao}</p>
+                </div>
+            </div>
+        `).join('');
+        
+        // Etapa 2: Pilar Global
+        const containerGlobal = document.getElementById('configuracao-pilar-global');
+        containerGlobal.innerHTML = estado.tarefasGlobaisPredefinidas.map(tarefa => `
+            <div class="tarefa-global-item">
+                <label for="${tarefa.id}">${tarefa.nome}</label>
+                <div class="campo-grupo">
+                    <input type="${tarefa.tipo === 'horario' ? 'time' : 'hidden'}" id="${tarefa.id}" value="${tarefa.horario || ''}" class="campo-input">
+                </div>
+            </div>
+        `).join('');
+
+        renderizarEtapaOnboarding();
+        abrirModal('modal-onboarding');
+    }
+    
+    function concluirOnboarding() {
+        // 1. Processar Pilares Opcionais
+        estado.onboarding.pilaresSelecionados.forEach(pilar => {
+             if(!encontrarPorId(estado.pilares, pilar.id)) estado.pilares.push(pilar);
+        });
+
+        // 2. Processar Tarefas do Pilar Global
+        const pilarGlobalId = estado.pilares.find(p => p.nome === 'Global/Básico').id;
+        const microMetaGlobal = { id: Math.max(0, ...estado.microMetas.map(m => m.id)) + 1, metaId: null, nome: 'Rotina Diária' };
+        estado.microMetas.push(microMetaGlobal);
+
+        document.querySelectorAll('#configuracao-pilar-global .tarefa-global-item input').forEach(input => {
+            const tarefaPredefinida = estado.tarefasGlobaisPredefinidas.find(t => t.id === input.id);
+            if (tarefaPredefinida && (!input.value || input.type === 'hidden')) {
+                const novaTarefa = {
+                    id: Math.max(0, ...estado.tarefas.map(t => t.id)) + 1,
+                    microMetaId: microMetaGlobal.id,
+                    nome: tarefaPredefinida.nome,
+                    data: null, // Será recorrente
+                    tipo: tarefaPredefinida.tipo,
+                    horario: input.value || null,
+                    concluida: false
+                };
+                // Aqui seria a lógica para adicionar como tarefa recorrente. Para o mock, vamos apenas logar.
+                console.log("Adicionar tarefa global recorrente:", novaTarefa);
+            }
+        });
+
+        // 3. Processar Categorias Iniciais
+        document.querySelectorAll('#configuracao-categorias-iniciais input').forEach(input => {
+            if (input.value.trim() !== '') {
+                const novaCategoria = {
+                    id: Math.max(0, ...estado.categorias.map(c => c.id)) + 1,
+                    pilarId: parseInt(input.dataset.pilarIdOnboarding),
+                    nome: input.value.trim()
+                };
+                estado.categorias.push(novaCategoria);
+            }
+        });
+
+        localStorage.setItem('avancarOnboardingConcluido', 'true');
+        fecharModal('modal-onboarding');
+        renderizarPagina(); // Re-renderiza a página com os novos dados
+        notificacao('Tudo pronto!', 'Sua jornada no Avançar começa agora.', 'success');
+    }
+
+    document.getElementById('selecao-pilares-opcionais').addEventListener('click', e => {
+        const card = e.target.closest('.card');
+        if(!card) return;
+        card.classList.toggle('ativo');
+        
+        const pilarId = parseInt(card.dataset.pilarOpcionalId);
+        const pilar = estado.pilaresOpcionais.find(p => p.id === pilarId);
+        
+        if (card.classList.contains('ativo')) {
+            estado.onboarding.pilaresSelecionados.push(pilar);
+        } else {
+            estado.onboarding.pilaresSelecionados = estado.onboarding.pilaresSelecionados.filter(p => p.id !== pilarId);
+        }
+    });
+
+    document.getElementById('btn-onboarding-proximo').addEventListener('click', () => {
+        if (estado.onboarding.etapaAtual === 4) {
+            concluirOnboarding();
+        } else {
+            navegarOnboarding('proximo');
+        }
+    });
+    document.getElementById('btn-onboarding-anterior').addEventListener('click', () => navegarOnboarding('anterior'));
+
+
+    // ===== FUNÇÕES UTILITÁRIAS =====
+    function atualizarLinkAtivo() {
+        linksNavegacao.forEach(link => {
+            const isAtivo = link.dataset.pagina === estado.paginaAtual || (estado.paginaAtual === 'categoria' && link.dataset.pagina === 'pilares');
+            link.classList.toggle('ativo', isAtivo);
+        });
+    }
+
+    function encontrarPorId(array, id) {
+        if (!array || !Array.isArray(array)) return undefined;
+        return array.find(item => item.id == id);
+    }
+    
+    function preencherSelect(selectId, dados, valorSelecionado = null) {
+        const select = document.getElementById(selectId);
+        if(!select) return;
+        select.innerHTML = `<option value="">Selecione...</option>`;
+        dados.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.id;
+            option.textContent = item.nome;
+            if (item.id == valorSelecionado) option.selected = true;
+            select.appendChild(option);
+        });
+    }
+    
+    function formatarData(dataString) {
+        if(!dataString) return '';
+        const [ano, mes, dia] = dataString.split('-');
+        return `${dia}/${mes}/${ano}`;
+    }
+    
+    function notificacao(titulo, texto, icone) {
+        Swal.fire({
+            title: titulo, text: texto, icon: icone, toast: true, position: 'top-end',
+            showConfirmButton: false, timer: 3000, timerProgressBar: true,
+            background: 'var(--cor-fundo-secundario)', color: 'var(--cor-texto-principal)'
+        });
+    }
+    
+    function confirmarExclusao(tipo, id) {
+        Swal.fire({
+            title: 'Você tem certeza?', text: `Esta ação não pode ser revertida!`, icon: 'warning',
+            showCancelButton: true, confirmButtonColor: 'var(--cor-erro)', cancelButtonColor: 'var(--cor-hover)',
+            confirmButtonText: 'Sim, excluir!', cancelButtonText: 'Cancelar',
+            background: 'var(--cor-fundo-secundario)', color: 'var(--cor-texto-principal)'
+        }).then((resultado) => {
+            if (resultado.isConfirmed) {
+                excluirItem(tipo, id);
+            }
+        });
+    }
+
+    // ===== INICIALIZAÇÃO =====
+    renderizarPagina();
+    iniciarOnboarding();
+
+});
+</script>
+
+</body>
+</html>
+
