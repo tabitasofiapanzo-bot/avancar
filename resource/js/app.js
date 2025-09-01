@@ -1085,50 +1085,41 @@ document.addEventListener('DOMContentLoaded', () => {
         abrirModal('modal-onboarding');
     }
 
-    function concluirOnboarding() {
-        // 1. Processar Pilares Opcionais
-        estado.onboarding.pilaresSelecionados.forEach(pilar => {
-             if(!encontrarPorId(estado.pilares, pilar.id)) estado.pilares.push(pilar);
-        });
+    async function concluirOnboarding() {
+        // Coletar todos os dados do onboarding
+        const pilaresOpcionais = estado.onboarding.pilaresSelecionados;
 
-        // 2. Processar Tarefas do Pilar Global
-        const pilarGlobalId = estado.pilares.find(p => p.nome === 'Global/Básico').id;
-        const microMetaGlobal = { id: Math.max(0, ...estado.microMetas.map(m => m.id)) + 1, metaId: null, nome: 'Rotina Diária' };
-        estado.microMetas.push(microMetaGlobal);
-
-        document.querySelectorAll('#configuracao-pilar-global .tarefa-global-item input').forEach(input => {
-            const tarefaPredefinida = estado.tarefasGlobaisPredefinidas.find(t => t.id === input.id);
-            if (tarefaPredefinida && (!input.value || input.type === 'hidden')) {
-                const novaTarefa = {
-                    id: Math.max(0, ...estado.tarefas.map(t => t.id)) + 1,
-                    microMetaId: microMetaGlobal.id,
-                    nome: tarefaPredefinida.nome,
-                    data: null, // Será recorrente
-                    tipo: tarefaPredefinida.tipo,
-                    horario: input.value || null,
-                    concluida: false
-                };
-                // Aqui seria a lógica para adicionar como tarefa recorrente. Para o mock, vamos apenas logar.
-                console.log("Adicionar tarefa global recorrente:", novaTarefa);
-            }
-        });
-
-        // 3. Processar Categorias Iniciais
+        const categoriasIniciais = [];
         document.querySelectorAll('#configuracao-categorias-iniciais input').forEach(input => {
             if (input.value.trim() !== '') {
-                const novaCategoria = {
-                    id: Math.max(0, ...estado.categorias.map(c => c.id)) + 1,
+                categoriasIniciais.push({
                     pilarId: parseInt(input.dataset.pilarIdOnboarding),
                     nome: input.value.trim()
-                };
-                estado.categorias.push(novaCategoria);
+                });
             }
         });
 
-        localStorage.setItem('avancarOnboardingConcluido', 'true');
-        fecharModal('modal-onboarding');
-        renderizarPagina(); // Re-renderiza a página com os novos dados
-        notificacao('Tudo pronto!', 'Sua jornada no Avançar começa agora.', 'success');
+        const dadosOnboarding = {
+            pilaresOpcionais,
+            categoriasIniciais,
+            // Futuramente, adicionar tarefas de rotina e outras configs
+        };
+
+        try {
+            const resposta = await chamarApi('/onboarding/salvar', dadosOnboarding);
+
+            if (resposta.sucesso) {
+                localStorage.setItem('avancarOnboardingConcluido', 'true');
+                fecharModal('modal-onboarding');
+                notificacao('Tudo pronto!', 'Sua jornada no Avançar começa agora.', 'success');
+                // Recarregar a página para refletir as novas informações do servidor
+                window.location.reload();
+            } else {
+                notificacao('Erro!', resposta.mensagem || 'Não foi possível concluir o onboarding.', 'error');
+            }
+        } catch (erro) {
+            notificacao('Erro de Rede!', 'Não foi possível conectar ao servidor.', 'error');
+        }
     }
 
     document.getElementById('selecao-pilares-opcionais').addEventListener('click', e => {
@@ -1157,6 +1148,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ===== FUNÇÕES UTILITÁRIAS =====
+
+    async function chamarApi(endpoint, dados = {}, metodo = 'POST') {
+        try {
+            const url = `http://localhost:8080${endpoint}`; // Assumindo que a API está no mesmo domínio
+            const resposta = await fetch(url, {
+                method: metodo,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(dados)
+            });
+            return await resposta.json();
+        } catch (erro) {
+            console.error('Erro da API:', erro);
+            throw erro;
+        }
+    };
+
     function atualizarLinkAtivo() {
         linksNavegacao.forEach(link => {
             const isAtivo = link.dataset.pagina === estado.paginaAtual || (estado.paginaAtual === 'categoria' && link.dataset.pagina === 'pilares');

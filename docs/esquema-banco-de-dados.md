@@ -13,6 +13,7 @@ Armazena as informações dos usuários da aplicação.
 | `nome` | VARCHAR(255) | NOT NULL | Nome completo do usuário. |
 | `email` | VARCHAR(255) | NOT NULL, UNIQUE | Endereço de email do usuário (usado para login). |
 | `senha` | VARCHAR(255) | NOT NULL | Senha do usuário (armazenada como hash). |
+| `onboarding_concluido` | BOOLEAN | NOT NULL DEFAULT FALSE | Indica se o usuário completou o processo de onboarding. |
 | `criado_em` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Data e hora de criação do registro. |
 
 ---
