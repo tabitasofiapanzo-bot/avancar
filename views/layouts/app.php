@@ -24,11 +24,7 @@
             <?php include_once __DIR__ . '/../partials/_cabecalho.php'; ?>
 
             <main class="container-pagina" id="container-pagina">
-                <?php
-                // Futuramente, o roteador irá definir qual página carregar.
-                // Por enquanto, carregamos o dashboard por padrão.
-                include_once __DIR__ . '/../pages/dashboard.php';
-                ?>
+                <?= $conteudo ?? '' ?>
             </main>
 
             <?php include_once __DIR__ . '/../partials/_rodape.php'; ?>
