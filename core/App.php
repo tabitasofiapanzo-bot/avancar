@@ -13,7 +13,14 @@ class App {
      */
     public function run() {
         try {
-            $uri = parse_url($_SERVER['REQUEST_URI'])['path'];
+            // Obtém a URI a partir do parâmetro 'url' fornecido pelo .htaccess
+            $uri = '/' . ($_GET['url'] ?? '');
+
+            // Remove a barra final, exceto se for a rota raiz
+            if ($uri !== '/') {
+                $uri = rtrim($uri, '/');
+            }
+
             $metodo = $_SERVER['REQUEST_METHOD'];
 
             $this->roteador->despachar($uri, $metodo);
