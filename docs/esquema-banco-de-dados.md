@@ -1,6 +1,6 @@
 # Esquema do Banco de Dados - Avançar
 
-Este documento descreve a estrutura do banco de dados para a aplicação "Avançar". Todas as tabelas estão em português e no singular, conforme a convenção do projeto.
+Este documento descreve a estrutura do banco de dados para a aplicação "Avançar". O modelo de dados separa "templates" de dados (compartilhados) e "instâncias" de dados (específicas do usuário).
 
 ---
 
@@ -18,27 +18,38 @@ Armazena as informações dos usuários da aplicação.
 
 ---
 
-## Tabela: `pilar`
-Armazena os pilares da vida de cada usuário.
+## Tabela: `pilar_template`
+Armazena os modelos de pilares disponíveis no sistema (dados globais).
 
 | Coluna | Tipo | Restrições | Descrição |
 |---|---|---|---|
-| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Identificador único do pilar. |
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Identificador único do template do pilar. |
+| `nome` | VARCHAR(100) | NOT NULL, UNIQUE | Nome do pilar (ex: Saúde, Carreira). |
+| `descricao` | TEXT | | Descrição padrão do pilar. |
+| `cor` | VARCHAR(7) | NOT NULL DEFAULT '#ffffff' | Cor hexadecimal padrão para o pilar. |
+| `obrigatorio`| BOOLEAN | NOT NULL DEFAULT FALSE | Se o pilar é obrigatório para todos os novos usuários. |
+| `is_basico` | BOOLEAN | NOT NULL DEFAULT FALSE | Identifica o pilar "Global/Básico" para lógicas especiais. |
+
+---
+
+## Tabela: `pilar_usuario`
+Associa um usuário a um pilar, criando uma instância pessoal daquele pilar.
+
+| Coluna | Tipo | Restrições | Descrição |
+|---|---|---|---|
+| `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Identificador único da instância do pilar do usuário. |
 | `usuario_id` | INT | NOT NULL, FOREIGN KEY (`usuario`.`id`) | Chave estrangeira para a tabela `usuario`. |
-| `nome` | VARCHAR(100) | NOT NULL | Nome do pilar (ex: Saúde, Carreira). |
-| `descricao` | TEXT | | Descrição opcional do pilar. |
-| `cor` | VARCHAR(7) | NOT NULL DEFAULT '#ffffff' | Cor hexadecimal para representação visual. |
-| `obrigatorio`| BOOLEAN | NOT NULL DEFAULT FALSE | Indica se o pilar é obrigatório e não pode ser excluído. |
+| `pilar_template_id` | INT | NOT NULL, FOREIGN KEY (`pilar_template`.`id`) | Chave estrangeira para a tabela `pilar_template`. |
 
 ---
 
 ## Tabela: `categoria`
-Armazena as categorias dentro de cada pilar.
+Armazena as categorias que um usuário cria dentro de uma de suas instâncias de pilar.
 
 | Coluna | Tipo | Restrições | Descrição |
 |---|---|---|---|
 | `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Identificador único da categoria. |
-| `pilar_id` | INT | NOT NULL, FOREIGN KEY (`pilar`.`id`) | Chave estrangeira para a tabela `pilar`. |
+| `pilar_usuario_id` | INT | NOT NULL, FOREIGN KEY (`pilar_usuario`.`id`) | Chave estrangeira para a instância do pilar do usuário. |
 | `nome` | VARCHAR(100) | NOT NULL | Nome da categoria (ex: Exercício Físico). |
 
 ---
@@ -55,7 +66,7 @@ Armazena as subcategorias (opcionais) dentro de cada categoria.
 ---
 
 ## Tabela: `meta`
-Armazena as metas de longo prazo, associadas a uma categoria.
+Armazena as metas de longo prazo, associadas a uma categoria de um usuário.
 
 | Coluna | Tipo | Restrições | Descrição |
 |---|---|---|---|

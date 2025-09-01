@@ -102,23 +102,13 @@ class AuthController extends Controlador {
     }
 
     private function criarPilaresPadrao($usuario_id) {
-        $pilaresPadrao = [
-            ['nome' => 'Saúde', 'descricao' => 'Bem-estar físico e mental', 'cor' => '#4caf50', 'obrigatorio' => true],
-            ['nome' => 'Educação', 'descricao' => 'Aprendizagem e desenvolvimento', 'cor' => '#2196f3', 'obrigatorio' => true],
-            ['nome' => 'Finanças', 'descricao' => 'Gestão financeira e investimentos', 'cor' => '#ff9800', 'obrigatorio' => true],
-            ['nome' => 'Espiritualidade', 'descricao' => 'Crescimento e conexão', 'cor' => '#7e57c2', 'obrigatorio' => true],
-            ['nome' => 'Global/Básico', 'descricao' => 'Atividades essenciais do dia a dia', 'cor' => '#78909c', 'obrigatorio' => true],
-        ];
+        $pilarTemplateModelo = $this->carregarModelo('PilarTemplate');
+        $pilarUsuarioModelo = $this->carregarModelo('PilarUsuario');
 
-        $pilarModelo = $this->carregarModelo('Pilar');
-        foreach ($pilaresPadrao as $pilar) {
-            $pilarModelo->criar([
-                'usuario_id' => $usuario_id,
-                'nome' => $pilar['nome'],
-                'descricao' => $pilar['descricao'],
-                'cor' => $pilar['cor'],
-                'obrigatorio' => $pilar['obrigatorio'],
-            ]);
+        $pilaresObrigatorios = $pilarTemplateModelo->buscarObrigatorios();
+
+        foreach ($pilaresObrigatorios as $pilarTmpl) {
+            $pilarUsuarioModelo->criar($usuario_id, $pilarTmpl['id']);
         }
     }
 

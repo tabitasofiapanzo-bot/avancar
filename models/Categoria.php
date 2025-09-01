@@ -6,17 +6,17 @@ class Categoria extends Modelo {
     /**
      * Cria uma nova categoria no banco de dados.
      *
-     * @param int $pilar_id
+     * @param int $pilar_usuario_id
      * @param string $nome
      * @return bool
      */
-    public function criar($pilar_id, $nome) {
+    public function criar($pilar_usuario_id, $nome) {
         $stmt = $this->pdo->prepare(
-            "INSERT INTO {$this->tabela} (pilar_id, nome) VALUES (:pilar_id, :nome)"
+            "INSERT INTO {$this->tabela} (pilar_usuario_id, nome) VALUES (:pilar_usuario_id, :nome)"
         );
 
         return $stmt->execute([
-            'pilar_id' => $pilar_id,
+            'pilar_usuario_id' => $pilar_usuario_id,
             'nome' => $nome
         ]);
     }

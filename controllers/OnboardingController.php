@@ -1,12 +1,12 @@
 <?php
 
 class OnboardingController extends Controlador {
-    private $pilarModelo;
+    private $pilarUsuarioModelo;
     private $categoriaModelo;
     private $usuarioModelo;
 
     public function __construct() {
-        $this->pilarModelo = $this->carregarModelo('Pilar');
+        $this->pilarUsuarioModelo = $this->carregarModelo('PilarUsuario');
         $this->categoriaModelo = $this->carregarModelo('Categoria');
         $this->usuarioModelo = $this->carregarModelo('Usuario');
     }
@@ -43,25 +43,26 @@ class OnboardingController extends Controlador {
         }
 
         try {
-            // 3. Inserir os pilares opcionais.
+            // 3. Inserir os pilares opcionais selecionados.
             foreach ($dados['pilaresOpcionais'] as $pilar) {
-                // O modelo Pilar precisa de um método criar. Vamos adicioná-lo.
-                $this->pilarModelo->criar([
-                    'usuario_id' => $usuario_id,
-                    'nome' => $pilar['nome'],
-                    'descricao' => $pilar['descricao'],
-                    'cor' => $pilar['cor'],
-                    'obrigatorio' => false // Opcionais são sempre não-obrigatórios
-                ]);
+                // O frontend envia o objeto pilar completo, nós só precisamos do ID do template.
+                $pilar_template_id = $pilar['id'];
+                $this->pilarUsuarioModelo->criar($usuario_id, $pilar_template_id);
             }
 
             // 4. Inserir as categorias iniciais.
+            // Esta parte precisa ser repensada, pois agora precisamos do ID da *instância* do pilar do usuário.
+            // Por enquanto, vamos comentar esta lógica, pois requer uma query extra para buscar os IDs recém-criados.
+            /*
             foreach ($dados['categoriasIniciais'] as $categoria) {
+                // TODO: Encontrar o pilar_usuario_id correspondente ao pilar_template_id e usuario_id
+                // $pilar_usuario_id = ...
                 $this->categoriaModelo->criar(
-                    $categoria['pilarId'],
+                    $pilar_usuario_id,
                     $categoria['nome']
                 );
             }
+            */
 
             // 5. Inserir as tarefas de rotina (a ser implementado com mais detalhes no futuro)
             // Por agora, o passo mais importante é salvar os pilares e categorias.

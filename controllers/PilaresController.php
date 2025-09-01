@@ -1,20 +1,23 @@
 <?php
 
 class PilaresController extends Controlador {
-    private $pilarModelo;
+    private $pilarUsuarioModelo;
 
     public function __construct() {
-        $this->pilarModelo = $this->carregarModelo('Pilar');
+        $this->pilarUsuarioModelo = $this->carregarModelo('PilarUsuario');
     }
 
     /**
      * Exibe a página de pilares com dados do banco de dados.
      */
     public function index() {
-        // ID do usuário hardcoded para fins de teste (até a implementação de autenticação)
-        $usuario_id = 1;
+        if (!isset($_SESSION['usuario_id'])) {
+            header('Location: /login');
+            exit;
+        }
+        $usuario_id = $_SESSION['usuario_id'];
 
-        $pilares = $this->pilarModelo->buscarPorUsuario($usuario_id);
+        $pilares = $this->pilarUsuarioModelo->buscarPilaresPorUsuario($usuario_id);
 
         $dados = [
             'pilares' => $pilares
