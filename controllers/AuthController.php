@@ -1,6 +1,7 @@
 <?php
 
 class AuthController extends Controlador {
+    private $usuarioModelo;
 
     public function __construct() {
         $this->usuarioModelo = $this->carregarModelo('Usuario');
@@ -90,11 +91,10 @@ class AuthController extends Controlador {
             // Lógica para adicionar pilares padrão
             $this->criarPilaresPadrao($novoUsuarioId);
 
-            // Iniciar sessão e redirecionar
+            // Iniciar sessão e redirecionar para o onboarding
             session_start();
             $_SESSION['usuario_id'] = $novoUsuarioId;
-            // O onboarding será o próximo passo, mas por agora redirecionamos para o dashboard
-            header('Location: /');
+            header('Location: /onboarding');
             exit;
         } else {
             die('Ocorreu um erro ao criar a sua conta.');

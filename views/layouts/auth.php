@@ -10,72 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Recursos Locais -->
-    <link rel="stylesheet" href="/resource/css/app.css">
-
-    <style>
-        /* Estilos específicos para a página de autenticação */
-        .auth-container {
-            display: flex;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-        }
-        .auth-branding {
-            width: 50%;
-            background-color: var(--cor-fundo-secundario);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            color: var(--cor-texto-principal);
-        }
-        .auth-branding h1 {
-            font-size: 3rem;
-            margin-bottom: 16px;
-        }
-        .auth-branding .logo {
-            font-size: 4rem;
-            color: var(--cor-primaria);
-            margin-bottom: 24px;
-        }
-        .auth-form-container {
-            width: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-        }
-        .auth-form {
-            width: 100%;
-            max-width: 400px;
-        }
-        .auth-form h2 {
-            margin-bottom: 24px;
-            text-align: center;
-        }
-        .campo-grupo input {
-            padding-left: 40px;
-        }
-        .campo-icone {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--cor-texto-terciario);
-        }
-        .campo-grupo {
-            position: relative;
-        }
-        @media (max-width: 768px) {
-            .auth-branding {
-                display: none;
-            }
-            .auth-form-container {
-                width: 100%;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/resource/css/auth.css">
 </head>
 <body>
 
@@ -92,6 +27,6 @@
     </div>
 
     <!-- Scripts Locais -->
-    <script src="/resource/js/app.js"></script>
+    <script src="/resource/js/auth.js"></script>
 </body>
 </html>

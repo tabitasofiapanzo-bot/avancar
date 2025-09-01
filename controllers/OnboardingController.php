@@ -12,6 +12,13 @@ class OnboardingController extends Controlador {
     }
 
     /**
+     * Exibe a página de onboarding.
+     */
+    public function index() {
+        $this->carregarVisao('onboarding');
+    }
+
+    /**
      * Processa os dados submetidos do formulário de onboarding.
      */
     public function salvar() {
@@ -21,8 +28,13 @@ class OnboardingController extends Controlador {
         $dadosJson = file_get_contents('php://input');
         $dados = json_decode($dadosJson, true);
 
-        // Simulação de autenticação - no futuro viria da sessão
-        $usuario_id = 1;
+        // O usuário deve estar logado para acessar esta função
+        if (!isset($_SESSION['usuario_id'])) {
+            http_response_code(401); // Unauthorized
+            echo json_encode(['sucesso' => false, 'mensagem' => 'Acesso não autorizado.']);
+            return;
+        }
+        $usuario_id = $_SESSION['usuario_id'];
 
         // Validação básica dos dados
         if (empty($dados) || !isset($dados['pilaresOpcionais']) || !isset($dados['categoriasIniciais'])) {

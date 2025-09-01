@@ -14,4 +14,5 @@ $roteador->post('/registo/processar', 'AuthController@processarRegisto');
 $roteador->get('/logout', 'AuthController@logout');
 
 // --- Onboarding ---
-$roteador->post('/onboarding/salvar', 'OnboardingController@salvar');
+$roteador->get('/onboarding', 'OnboardingController@index'); // Exibir página de onboarding
+$roteador->post('/onboarding/salvar', 'OnboardingController@salvar'); // Processar dados do onboarding
