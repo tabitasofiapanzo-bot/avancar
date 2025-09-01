@@ -2,27 +2,26 @@
 
 // Classe principal da aplicação que gerencia o roteamento.
 class App {
-    private $roteador;
+    protected $roteador;
 
     public function __construct() {
-        $this->roteador = new Roteador();
-        $this->carregarRotas();
+        $this->roteador = Roteador::carregar(BASE_PATH . '/config/rotas.php');
     }
 
     /**
-     * Carrega as rotas definidas no arquivo de configuração.
-     */
-    private function carregarRotas() {
-        $rotas = require BASE_PATH . '/config/rotas.php';
-        foreach ($rotas as $uri => $acao) {
-            $this->roteador->adicionarRota($uri, $acao);
-        }
-    }
-
-    /**
-     * Executa a aplicação.
+     * Executa a aplicação, despachando a rota correspondente à URI e ao método da requisição.
      */
     public function run() {
-        $this->roteador->despachar();
+        try {
+            $uri = parse_url($_SERVER['REQUEST_URI'])['path'];
+            $metodo = $_SERVER['REQUEST_METHOD'];
+
+            $this->roteador->despachar($uri, $metodo);
+        } catch (Exception $e) {
+            // Em ambiente de produção, logar o erro
+            http_response_code(404);
+            // Carregar uma view de 404
+            require BASE_PATH . '/views/pages/404.php';
+        }
     }
 }

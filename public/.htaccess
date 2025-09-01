@@ -1,0 +1,14 @@
+# Ativa o motor de reescrita de URL do Apache
+RewriteEngine On
+
+# Impede a listagem de diretórios
+Options -Indexes
+
+# Se a requisição não for para um arquivo existente...
+RewriteCond %{REQUEST_FILENAME} !-f
+# E se a requisição não for para um diretório existente...
+RewriteCond %{REQUEST_FILENAME} !-d
+# ...redireciona a requisição para o front controller (index.php)
+# O parâmetro [L] faz com que esta seja a última regra a ser aplicada.
+# O parâmetro [QSA] anexa qualquer string de query original à URL reescrita.
+RewriteRule ^(.*)$ index.php?url=$1 [L,QSA]

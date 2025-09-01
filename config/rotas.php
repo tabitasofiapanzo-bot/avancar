@@ -1,18 +1,17 @@
 <?php
 
 // Definição das rotas da aplicação
-return [
-    // Rotas da Aplicação Principal
-    '/' => 'PaginasController@index',
-    '/pilares' => 'PilaresController@index',
+// O objeto $roteador é instanciado em core/App.php e passado para este arquivo.
 
-    // Rotas de Autenticação
-    '/login' => 'AuthController@login', // Exibir formulário de login
-    '/login/processar' => 'AuthController@processarLogin', // Processar POST do login
-    '/registo' => 'AuthController@registo', // Exibir formulário de registo
-    '/registo/processar' => 'AuthController@processarRegisto', // Processar POST do registo
-    '/logout' => 'AuthController@logout',
+$roteador->get('/', 'PaginasController@index');
+$roteador->get('/pilares', 'PilaresController@index');
 
-    // Rota de Onboarding
-    '/onboarding/salvar' => 'OnboardingController@salvar',
-];
+// --- Autenticação ---
+$roteador->get('/login', 'AuthController@login');
+$roteador->post('/login/processar', 'AuthController@processarLogin');
+$roteador->get('/registo', 'AuthController@registo');
+$roteador->post('/registo/processar', 'AuthController@processarRegisto');
+$roteador->get('/logout', 'AuthController@logout');
+
+// --- Onboarding ---
+$roteador->post('/onboarding/salvar', 'OnboardingController@salvar');

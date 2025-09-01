@@ -2,62 +2,74 @@
 
 // Classe para gerir as rotas da aplicação.
 class Roteador {
-    protected $rotas = [];
-    protected $controlador = 'PaginasController'; // Controlador padrão
-    protected $metodo = 'index'; // Método padrão
-    protected $parametros = [];
+    protected $rotas = [
+        'GET' => [],
+        'POST' => []
+    ];
 
-    public function __construct() {
-        $this->parseUrl();
+    /**
+     * Carrega um arquivo de rotas.
+     * @param string $arquivo O caminho para o arquivo de rotas.
+     * @return static
+     */
+    public static function carregar($arquivo) {
+        $roteador = new static;
+        require $arquivo;
+        return $roteador;
     }
 
     /**
-     * Adiciona uma rota ao roteador.
-     *
-     * @param string $uri A URI da rota (ex: '/usuarios/:id').
-     * @param string $acao A ação do controlador (ex: 'UsuariosController@mostrar').
+     * Define uma rota GET.
+     * @param string $uri
+     * @param string $acao Controller@method
      */
-    public function adicionarRota($uri, $acao) {
-        $this->rotas[$uri] = $acao;
+    public function get($uri, $acao) {
+        $this->rotas['GET'][$uri] = $acao;
     }
 
     /**
-     * Analisa a URL para determinar o controlador, método e parâmetros.
+     * Define uma rota POST.
+     * @param string $uri
+     * @param string $acao Controller@method
      */
-    public function parseUrl() {
-        $url = isset($_GET['url']) ? rtrim($_GET['url'], '/') : '';
-        $url = filter_var($url, FILTER_SANITIZE_URL);
-        $url_parts = explode('/', $url);
-
-        // Determina o controlador
-        if (!empty($url_parts[0])) {
-            $nomeControlador = ucfirst($url_parts[0]) . 'Controller';
-            if (file_exists(BASE_PATH . '/controllers/' . $nomeControlador . '.php')) {
-                $this->controlador = $nomeControlador;
-                unset($url_parts[0]);
-            }
-        }
-
-        // Inclui e instancia o controlador
-        require_once BASE_PATH . '/controllers/' . $this->controlador . '.php';
-        $this->controlador = new $this->controlador;
-
-        // Determina o método
-        if (isset($url_parts[1])) {
-            if (method_exists($this->controlador, $url_parts[1])) {
-                $this->metodo = $url_parts[1];
-                unset($url_parts[1]);
-            }
-        }
-
-        // Obtém os parâmetros
-        $this->parametros = $url_parts ? array_values($url_parts) : [];
+    public function post($uri, $acao) {
+        $this->rotas['POST'][$uri] = $acao;
     }
 
     /**
      * Despacha a requisição para o controlador e método apropriados.
+     * @param string $uri
+     * @param string $metodoRequest
      */
-    public function despachar() {
-        call_user_func_array([$this->controlador, $this->metodo], $this->parametros);
+    public function despachar($uri, $metodoRequest) {
+        if (array_key_exists($uri, $this->rotas[$metodoRequest])) {
+            $acao = $this->rotas[$metodoRequest][$uri];
+            return $this->chamarAcao(...explode('@', $acao));
+        }
+
+        // Lançar uma exceção ou chamar um método de erro 404
+        throw new Exception("Nenhuma rota definida para esta URI: {$uri}");
+    }
+
+    /**
+     * Chama a ação do controlador.
+     * @param string $controlador
+     * @param string $metodo
+     * @return mixed
+     */
+    protected function chamarAcao($controlador, $metodo) {
+        $nomeControlador = "{$controlador}";
+
+        if (!class_exists($nomeControlador)) {
+            throw new Exception("Controlador '{$nomeControlador}' não encontrado.");
+        }
+
+        $controladorInstancia = new $nomeControlador;
+
+        if (!method_exists($controladorInstancia, $metodo)) {
+            throw new Exception("Método '{$metodo}' não encontrado no controlador '{$nomeControlador}'.");
+        }
+
+        return $controladorInstancia->$metodo();
     }
 }
