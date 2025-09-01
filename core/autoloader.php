@@ -1,12 +1,18 @@
 <?php
 
-// Autoloader simples para carregar as classes do core, models e controllers
-spl_autoload_register(function ($class) {
-    // Converte o namespace para o caminho do diretório (PSR-4-like)
-    // Ex: Controllers\Home -> controllers/Home.php
-    $class_path = BASE_PATH . '/' . str_replace('\\', '/', lcfirst($class)) . '.php';
+spl_autoload_register(function ($className) {
+    // Lista de diretórios onde as classes podem ser encontradas
+    $directories = [
+        'core',
+        'controllers',
+        'models'
+    ];
 
-    if (file_exists($class_path)) {
-        require_once $class_path;
+    foreach ($directories as $dir) {
+        $file = BASE_PATH . "/{$dir}/{$className}.php";
+        if (file_exists($file)) {
+            require_once $file;
+            return;
+        }
     }
 });
