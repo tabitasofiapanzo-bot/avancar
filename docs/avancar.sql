@@ -17,7 +17,7 @@ DROP TABLE IF EXISTS `usuario`;
 -- Tabela: `usuario`
 CREATE TABLE `usuario` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `nome` VARCHAR(255) NOT NULL,
+    `nome` VARCHAR(100) NOT NULL,
     `email` VARCHAR(255) NOT NULL UNIQUE,
     `senha` VARCHAR(255) NOT NULL,
     `onboarding_concluido` BOOLEAN NOT NULL DEFAULT FALSE,
@@ -27,7 +27,7 @@ CREATE TABLE `usuario` (
 -- Tabela: `pilar_template`
 CREATE TABLE `pilar_template` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `nome` VARCHAR(100) NOT NULL UNIQUE,
+    `nome` VARCHAR(50) NOT NULL UNIQUE,
     `descricao` TEXT,
     `cor` VARCHAR(7) NOT NULL DEFAULT '#ffffff',
     `obrigatorio` BOOLEAN NOT NULL DEFAULT FALSE,
@@ -47,7 +47,7 @@ CREATE TABLE `pilar_usuario` (
 CREATE TABLE `categoria` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
     `pilar_usuario_id` INT NOT NULL,
-    `nome` VARCHAR(100) NOT NULL,
+    `nome` VARCHAR(50) NOT NULL,
     FOREIGN KEY (`pilar_usuario_id`) REFERENCES `pilar_usuario`(`id`) ON DELETE CASCADE
 );
 
@@ -55,7 +55,7 @@ CREATE TABLE `categoria` (
 CREATE TABLE `subcategoria` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
     `categoria_id` INT NOT NULL,
-    `nome` VARCHAR(100) NOT NULL,
+    `nome` VARCHAR(50) NOT NULL,
     FOREIGN KEY (`categoria_id`) REFERENCES `categoria`(`id`) ON DELETE CASCADE
 );
 

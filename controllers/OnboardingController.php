@@ -15,7 +15,8 @@ class OnboardingController extends Controlador {
      * Exibe a página de onboarding.
      */
     public function index() {
-        $this->carregarVisao('onboarding');
+        // Usa o layout de autenticação, pois o onboarding é um passo pré-aplicação.
+        $this->carregarVisaoAuth('onboarding');
     }
 
     /**

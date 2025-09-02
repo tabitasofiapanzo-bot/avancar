@@ -26,6 +26,9 @@ abstract class Controlador {
      * @param array $dados Dados a serem extraídos e disponibilizados para a visão.
      */
     protected function carregarVisao($nomeVisao, $dados = []) {
+        // Torna a configuração da app disponível para todas as visões
+        $dados['config'] = require BASE_PATH . '/config/app.php';
+
         $caminhoVisao = BASE_PATH . '/views/pages/' . $nomeVisao . '.php';
         if (file_exists($caminhoVisao)) {
             // Extrai os dados para que possam ser usados como variáveis na visão
@@ -47,6 +50,9 @@ abstract class Controlador {
      * Carrega e renderiza uma visão de autenticação.
      */
     protected function carregarVisaoAuth($nomeVisao, $dados = []) {
+        // Torna a configuração da app disponível para todas as visões de auth
+        $dados['config'] = require BASE_PATH . '/config/app.php';
+
         $caminhoVisao = BASE_PATH . '/views/pages/auth/' . $nomeVisao . '.php';
         if (file_exists($caminhoVisao)) {
             extract($dados);

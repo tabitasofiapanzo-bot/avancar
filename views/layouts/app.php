@@ -18,7 +18,7 @@ if (!isset($_SESSION['usuario_id'])) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Recursos Locais -->
-    <link rel="stylesheet" href="/resource/css/app.css">
+    <link rel="stylesheet" href="<?= $config['base_url'] ?>/resource/css/app.css">
 </head>
 <body>
 
@@ -42,10 +42,9 @@ if (!isset($_SESSION['usuario_id'])) {
     <?php include_once __DIR__ . '/../partials/_modal_pilar.php'; ?>
     <?php include_once __DIR__ . '/../partials/_modal_meta.php'; ?>
     <?php include_once __DIR__ . '/../partials/_modal_tarefa.php'; ?>
-    <?php include_once __DIR__ . '/../partials/_modal_onboarding.php'; ?>
     <?php include_once __DIR__ . '/../partials/_modal_edicao_item.php'; ?>
 
     <!-- Scripts Locais -->
-    <script src="/resource/js/app.js"></script>
+    <script src="<?= $config['base_url'] ?>/resource/js/app.js"></script>
 </body>
 </html>

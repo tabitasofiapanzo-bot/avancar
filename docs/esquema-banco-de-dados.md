@@ -10,7 +10,7 @@ Armazena as informações dos usuários da aplicação.
 | Coluna | Tipo | Restrições | Descrição |
 |---|---|---|---|
 | `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Identificador único do usuário. |
-| `nome` | VARCHAR(255) | NOT NULL | Nome completo do usuário. |
+| `nome` | VARCHAR(100) | NOT NULL | Nome completo do usuário. |
 | `email` | VARCHAR(255) | NOT NULL, UNIQUE | Endereço de email do usuário (usado para login). |
 | `senha` | VARCHAR(255) | NOT NULL | Senha do usuário (armazenada como hash). |
 | `onboarding_concluido` | BOOLEAN | NOT NULL DEFAULT FALSE | Indica se o usuário completou o processo de onboarding. |
@@ -24,7 +24,7 @@ Armazena os modelos de pilares disponíveis no sistema (dados globais).
 | Coluna | Tipo | Restrições | Descrição |
 |---|---|---|---|
 | `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Identificador único do template do pilar. |
-| `nome` | VARCHAR(100) | NOT NULL, UNIQUE | Nome do pilar (ex: Saúde, Carreira). |
+| `nome` | VARCHAR(50) | NOT NULL, UNIQUE | Nome do pilar (ex: Saúde, Carreira). |
 | `descricao` | TEXT | | Descrição padrão do pilar. |
 | `cor` | VARCHAR(7) | NOT NULL DEFAULT '#ffffff' | Cor hexadecimal padrão para o pilar. |
 | `obrigatorio`| BOOLEAN | NOT NULL DEFAULT FALSE | Se o pilar é obrigatório para todos os novos usuários. |
@@ -50,7 +50,7 @@ Armazena as categorias que um usuário cria dentro de uma de suas instâncias de
 |---|---|---|---|
 | `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Identificador único da categoria. |
 | `pilar_usuario_id` | INT | NOT NULL, FOREIGN KEY (`pilar_usuario`.`id`) | Chave estrangeira para a instância do pilar do usuário. |
-| `nome` | VARCHAR(100) | NOT NULL | Nome da categoria (ex: Exercício Físico). |
+| `nome` | VARCHAR(50) | NOT NULL | Nome da categoria (ex: Exercício Físico). |
 
 ---
 
@@ -61,7 +61,7 @@ Armazena as subcategorias (opcionais) dentro de cada categoria.
 |---|---|---|---|
 | `id` | INT | PRIMARY KEY, AUTO_INCREMENT | Identificador único da subcategoria. |
 | `categoria_id` | INT | NOT NULL, FOREIGN KEY (`categoria`.`id`) | Chave estrangeira para a tabela `categoria`. |
-| `nome` | VARCHAR(100) | NOT NULL | Nome da subcategoria (ex: Corrida, Musculação). |
+| `nome` | VARCHAR(50) | NOT NULL | Nome da subcategoria (ex: Corrida, Musculação). |
 
 ---
 

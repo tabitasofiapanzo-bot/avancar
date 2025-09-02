@@ -10,7 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Recursos Locais -->
-    <link rel="stylesheet" href="/resource/css/auth.css">
+    <link rel="stylesheet" href="<?= $config['base_url'] ?>/resource/css/auth.css">
 </head>
 <body>
 
@@ -27,6 +27,6 @@
     </div>
 
     <!-- Scripts Locais -->
-    <script src="/resource/js/auth.js"></script>
+    <script src="<?= $config['base_url'] ?>/resource/js/auth.js"></script>
 </body>
 </html>

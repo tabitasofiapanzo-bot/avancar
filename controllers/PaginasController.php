@@ -1,13 +1,30 @@
 <?php
 
 class PaginasController extends Controlador {
+    private $pilarUsuarioModelo;
+
+    public function __construct() {
+        // Redireciona para o login se o usuário não estiver autenticado.
+        if (!estaLogado()) {
+            redirecionar('auth/login');
+        }
+
+        $this->pilarUsuarioModelo = $this->carregarModelo('PilarUsuario');
+    }
 
     /**
-     * Carrega a página inicial (dashboard).
+     * Carrega a página inicial (dashboard) com os dados do usuário.
      */
     public function index() {
-        // Por enquanto, apenas carrega a visão estática do dashboard.
-        // No futuro, buscaria dados dinâmicos.
-        $this->carregarVisao('dashboard');
+        $usuario_id = $_SESSION['usuario_id'];
+
+        // Buscar os pilares que o usuário selecionou.
+        $pilares = $this->pilarUsuarioModelo->buscarPilaresPorUsuario($usuario_id);
+
+        $dados = [
+            'pilares' => $pilares
+        ];
+
+        $this->carregarVisao('dashboard', $dados);
     }
 }
